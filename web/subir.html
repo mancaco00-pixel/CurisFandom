@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir tu Curis - CurisFandom</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <header class="top-bar">
+        <a href="index.html" class="logo-mini">
+            <span class="logo-c">C</span>uris<span class="logo-fandom">Fandom</span>
+        </a>
+
+        <div class="user-area" id="userArea">
+            <span class="user-name" id="userName">Invitado</span>
+            <div class="avatar" id="userAvatar">👤</div>
+            <button class="btn-google" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="user-menu" id="userMenu" style="display:none;">
+                <button class="menu-btn" id="myAccountBtn">Mi cuenta</button>
+                <button class="menu-btn" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h1 class="page-title">📤 Sube tu Curis</h1>
+            <div class="page-header-actions">
+                <a href="index.html" class="btn-back-home">← Volver al inicio</a>
+            </div>
+        </div>
+
+        <div class="ad-banner-top ad-square">
+            <span class="ad-square-label"><span>Espacio publicitario</span><span class="ad-square-tag">300×80</span></span>
+        </div>
+
+        <div class="incentive-box">
+            <div class="incentive-icon">🚀</div>
+            <div class="incentive-text">
+                <strong>¡Sube tus Curis y gana!</strong>
+                <p>Cada Curis que publiques puede ser calificado por miles de personas.</p>
+                <p>Entre más alta tu posición en el ranking, más lejos llegas. ¡El primer puesto se lleva dinero en efectivo!</p>
+                <p class="incentive-highlight">El ranking se actualiza cada 12 horas con los premios más recientes.</p>
+            </div>
+        </div>
+
+        <div class="upload-container">
+            <p class="muted upload-as">Tu Curis será publicado por: <strong id="uploadAs">@Usuario</strong></p>
+
+            <div class="upload-notice">
+                <span class="upload-notice-icon">📺</span>
+                <span>Para publicar vas a ver un anuncio de 30 segundos. Después, tu Curis queda
+                <strong>pendiente de revisión</strong> y aparece en Calificar y en el Ranking recién cuando el equipo lo aprueba.</span>
+            </div>
+
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <button class="btn-upload-big" id="pickFileBtn">
+                    <span class="upload-icon">📁</span>
+                    <span>SUBIR TU CURIS</span>
+                </button>
+                <p class="hint">Selecciona una imagen desde tu dispositivo</p>
+            </div>
+
+            <div class="upload-preview" id="uploadPreview" style="display:none;">
+                <h3>Vista previa</h3>
+                <img id="previewImg" alt="preview">
+
+                <div class="music-picker">
+                    <label for="musicSelect">🎵 Música de fondo (opcional)</label>
+                    <select id="musicSelect">
+                        <option value="">Sin música</option>
+                    </select>
+                    <p class="hint" id="musicEmptyHint" style="display:none;">Todavía no hay canciones cargadas — ¡pronto vamos a ir sumando!</p>
+                </div>
+
+                <button class="btn-primary" id="publishBtn">Publicar Curis</button>
+                <button class="btn-secondary" id="cancelPreviewBtn">Cancelar</button>
+            </div>
+        </div>
+
+        <div class="ad-banner-bottom ad-square">
+            <span class="ad-square-label"><span>Espacio publicitario</span><span class="ad-square-tag">300×80</span></span>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <a href="legal.html">Privacidad y Términos</a>
+        <span>·</span>
+        <span>CurisFandom</span>
+    </footer>
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+
+    <div class="modal" id="adModal">
+        <div class="modal-content">
+            <h2>Anuncio</h2>
+            <div class="ad-player" id="adPlayer">[ ANUNCIO - Integrar plataforma publicitaria ]</div>
+            <div class="ad-countdown" id="adCountdown">30</div>
+            <p class="hint" id="adHint">Cargando anuncio antes de publicar tu Curis...</p>
+        </div>
+    </div>
+
+
+    <div class="modal" id="extraAdModal">
+        <div class="modal-content">
+            <h2>Un paso más</h2>
+            <p>Para publicar este Curis necesitás ver un anuncio adicional.</p>
+            <button class="btn-primary btn-ad" id="extraAdBtn">Ver anuncio</button>
+        </div>
+    </div>
+
+
+    <div class="modal" id="successModal">
+        <div class="modal-content modal-success">
+            <div class="success-icon">✓</div>
+            <h2>¡Tu Curis fue enviado!</h2>
+            <p>Tu Curis quedó <strong>pendiente de revisión</strong>. Cuando el equipo lo apruebe vas a poder verlo en Calificar Curis y en el Ranking.</p>
+            <button class="btn-primary" id="successContinue">Continuar</button>
+        </div>
+    </div>
+
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Inicia sesión para subir tu Curis</h2>
+            <p id="loginMessage">Necesitas iniciar sesión para poder subir Curis.</p>
+            <button class="btn-google btn-google-big" id="modalGoogleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="other-methods" style="opacity:.4;pointer-events:none;">
+                <p class="hint">Otros métodos próximamente</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="chooseNameModal">
+        <div class="modal-content">
+            <h2>Elige tu nombre</h2>
+            <p>Este será el nombre que aparecerá cuando subas tus Curis.</p>
+            <input type="text" id="usernameInput" placeholder="Escribe tu nombre de usuario" maxlength="20">
+            <button class="btn-primary" id="saveNameBtn">Guardar nombre</button>
+        </div>
+    </div>
+
+
+    <div class="modal" id="accountModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Mi cuenta</h2>
+            <p><strong>Usuario:</strong> <span id="accName">@</span></p>
+            <p><strong>ID:</strong> <span id="accId">-</span></p>
+            <p><strong>Fecha de registro:</strong> <span id="accDate">-</span></p>
+            <p><strong>Curis subidos:</strong> <span id="accUploads">0</span></p>
+            <p><strong>Curis calificados:</strong> <span id="accRated">0</span></p>
+            <p class="hint" style="margin-top:1rem;">El perfil completo estará disponible próximamente.</p>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="music-library.js"></script>
+    <script src="app.js"></script>
+    <script>document.body.dataset.page = 'upload';</script>
+    <script src="animated-bg.js?v=7"></script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calificar Curis - CurisFandom</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <header class="top-bar">
+        <a href="index.html" class="logo-mini">
+            <span class="logo-c">C</span>uris<span class="logo-fandom">Fandom</span>
+        </a>
+
+        <div class="user-area" id="userArea">
+            <span class="user-name" id="userName">Invitado</span>
+            <div class="avatar" id="userAvatar">👤</div>
+            <button class="btn-google" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="user-menu" id="userMenu" style="display:none;">
+                <button class="menu-btn" id="myAccountBtn">Mi cuenta</button>
+                <button class="menu-btn" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h1 class="page-title">⭐ Calificar Curis</h1>
+            <div class="page-header-actions">
+                <a href="index.html" class="btn-back-home">← Volver al inicio</a>
+                <div class="counter-pill">Calificados: <span id="ratedCount">0</span> / <span id="totalCount">0</span></div>
+                <div class="counter-pill">Estrellas hoy: <span id="starsToday">0</span> / <span id="starsCapLabel">15</span></div>
+            </div>
+        </div>
+
+        <div class="ad-banner-top ad-square">
+            <span class="ad-square-label"><span>Espacio publicitario</span><span class="ad-square-tag">300×80</span></span>
+        </div>
+
+        <div class="tiktok-stage rate-stage" id="rateStage">
+            <div class="tiktok-card curis-card" id="curisCard">
+                <div class="curis-image" id="curisImage"></div>
+                <div class="tiktok-scrim"></div>
+
+                <div class="tiktok-side-actions">
+                    <button class="music-toggle-btn" id="musicToggleBtn" style="display:none;" aria-label="Reproducir música">🎵</button>
+                </div>
+
+                <div class="tiktok-bottom-info">
+                    <div class="curis-creator" id="rateCreator">@Creador</div>
+
+                    <div class="rate-controls" id="rateControlsWrap">
+                        <button class="star-btn" id="starMinus" aria-label="Bajar">
+                            <span>−</span>
+                        </button>
+
+                        <div class="stars-display" id="starsDisplay">
+                            <span class="star-icon" data-pos="1">★</span>
+                            <span class="star-icon" data-pos="2">★</span>
+                            <span class="star-icon" data-pos="3">★</span>
+                            <span class="star-icon" data-pos="4">★</span>
+                            <span class="star-icon" data-pos="5">★</span>
+                        </div>
+
+                        <button class="star-btn" id="starPlus" aria-label="Subir">
+                            <span>+</span>
+                        </button>
+                    </div>
+
+                    <div class="rate-value" id="rateValue">
+                        <span id="rateValueLabel">1.0</span>
+                    </div>
+
+                    <div class="rate-actions" id="rateActions">
+                        <button class="btn-primary btn-confirm" id="confirmRate">Confirmar calificación</button>
+                    </div>
+
+                    <div class="rate-feedback" id="rateFeedback" style="display:none;">
+                        <span id="rateFeedbackText"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <audio id="curisAudio" loop preload="none"></audio>
+
+        <div class="ad-banner-bottom ad-square">
+            <span class="ad-square-label"><span>Espacio publicitario</span><span class="ad-square-tag">300×80</span></span>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <a href="legal.html">Privacidad y Términos</a>
+        <span>·</span>
+        <span>CurisFandom</span>
+    </footer>
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+
+    <div class="modal" id="adModal">
+        <div class="modal-content">
+            <h2>Anuncio</h2>
+            <div class="ad-player" id="adPlayer">[ ANUNCIO - Integrar plataforma publicitaria ]</div>
+            <div class="ad-countdown" id="adCountdown">30</div>
+            <p class="hint" id="adHint">Mirando el anuncio para subir tu límite a 40 estrellas...</p>
+        </div>
+    </div>
+
+
+    <div class="modal" id="starLimitModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2 id="starLimitTitle">Llegaste al límite de hoy</h2>
+            <p id="starLimitText">Ya diste 15 estrellas hoy. Mirá un anuncio de 30 segundos para subir tu límite a 40 estrellas.</p>
+            <button class="btn-primary btn-ad" id="starLimitAdBtn">Ver anuncio y seguir calificando</button>
+        </div>
+    </div>
+
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Inicia sesión para continuar</h2>
+            <p id="loginMessage">Necesitas iniciar sesión para poder calificar Curis.</p>
+            <button class="btn-google btn-google-big" id="modalGoogleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="other-methods" style="opacity:.4;pointer-events:none;">
+                <p class="hint">Otros métodos próximamente</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="chooseNameModal">
+        <div class="modal-content">
+            <h2>Elige tu nombre</h2>
+            <p>Este será el nombre que aparecerá cuando subas tus Curis.</p>
+            <input type="text" id="usernameInput" placeholder="Escribe tu nombre de usuario" maxlength="20">
+            <button class="btn-primary" id="saveNameBtn">Guardar nombre</button>
+        </div>
+    </div>
+
+
+    <div class="modal" id="accountModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Mi cuenta</h2>
+            <p><strong>Usuario:</strong> <span id="accName">@</span></p>
+            <p><strong>ID:</strong> <span id="accId">-</span></p>
+            <p><strong>Fecha de registro:</strong> <span id="accDate">-</span></p>
+            <p><strong>Curis subidos:</strong> <span id="accUploads">0</span></p>
+            <p><strong>Curis calificados:</strong> <span id="accRated">0</span></p>
+            <a href="perfil.html" class="btn-primary" style="margin-top:1rem; display:inline-block; text-align:center; text-decoration:none;">Ver perfil completo</a>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="music-library.js"></script>
+    <script src="app.js"></script>
+    <script>document.body.dataset.page = 'rate';</script>
+    <script src="animated-bg.js?v=7"></script>
+</body>
+</html>

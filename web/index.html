@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CurisFandom - Plataforma de Entretenimiento</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <header class="top-bar">
+        <a href="index.html" class="logo-mini">
+            <span class="logo-c">C</span>uris<span class="logo-fandom">Fandom</span>
+        </a>
+
+        <div class="user-area" id="userArea">
+            <span class="user-name" id="userName">Invitado</span>
+            <div class="avatar" id="userAvatar">👤</div>
+            <button class="btn-google" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="user-menu" id="userMenu" style="display:none;">
+                <button class="menu-btn" id="myAccountBtn">Mi cuenta</button>
+                <button class="menu-btn" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+
+    <a href="#" class="patreon-float-btn" id="patreonBtn" rel="noopener">
+        <span class="patreon-icon">♥</span>
+        <span>Apoyanos en Patreon</span>
+    </a>
+
+    <main class="main-content">
+        <section class="hero">
+            <h1 class="brand-title">
+                <span class="brand-c">C</span>uris
+                <span class="brand-fandom">Fandom</span>
+            </h1>
+            <p class="brand-subtitle">Califica y sube Curis</p>
+
+            <div class="buttons-grid">
+                <a href="calificar.html" class="main-btn btn-rate">
+                    <span class="btn-icon">⭐</span>
+                    <span class="btn-label">CALIFICAR CURIS</span>
+                </a>
+                <a href="ranking.html" class="main-btn btn-ranking">
+                    <span class="btn-icon">🏆</span>
+                    <span class="btn-label">RANKING DE CURIS</span>
+                </a>
+                <a href="subir.html" class="main-btn btn-upload">
+                    <span class="btn-icon">📤</span>
+                    <span class="btn-label">SUBIR TU CURIS</span>
+                </a>
+                <a href="perfil.html" class="main-btn btn-create">
+                    <span class="btn-icon">👤</span>
+                    <span class="btn-label">MI PERFIL</span>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <a href="legal.html">Privacidad y Términos</a>
+        <span>·</span>
+        <span>CurisFandom</span>
+    </footer>
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Inicia sesión para continuar</h2>
+            <p id="loginMessage">Necesitas iniciar sesión para poder calificar Curis.</p>
+            <button class="btn-google btn-google-big" id="modalGoogleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="other-methods" style="opacity:.4;pointer-events:none;">
+                <p class="hint">Otros métodos próximamente</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="chooseNameModal">
+        <div class="modal-content">
+            <h2>Elige tu nombre</h2>
+            <p>Este será el nombre que aparecerá cuando subas tus Curis.</p>
+            <input type="text" id="usernameInput" placeholder="Escribe tu nombre de usuario" maxlength="20">
+            <button class="btn-primary" id="saveNameBtn">Guardar nombre</button>
+        </div>
+    </div>
+
+
+    <div class="modal" id="accountModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Mi cuenta</h2>
+            <p><strong>Usuario:</strong> <span id="accName">@</span></p>
+            <p><strong>ID:</strong> <span id="accId">-</span></p>
+            <p><strong>Fecha de registro:</strong> <span id="accDate">-</span></p>
+            <p><strong>Curis subidos:</strong> <span id="accUploads">0</span></p>
+            <p><strong>Curis calificados:</strong> <span id="accRated">0</span></p>
+            <a href="perfil.html" class="btn-primary" style="margin-top:1rem; display:inline-block; text-align:center; text-decoration:none;">Ver perfil completo</a>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="app.js"></script>
+    <script src="animated-bg.js?v=7"></script>
+</body>
+</html>

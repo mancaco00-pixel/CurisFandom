@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi perfil - CurisFandom</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <header class="top-bar">
+        <a href="index.html" class="logo-mini">
+            <span class="logo-c">C</span>uris<span class="logo-fandom">Fandom</span>
+        </a>
+
+        <div class="user-area" id="userArea">
+            <span class="user-name" id="userName">Invitado</span>
+            <div class="avatar" id="userAvatar">👤</div>
+            <button class="btn-google" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="user-menu" id="userMenu" style="display:none;">
+                <button class="menu-btn" id="myAccountBtn">Mi cuenta</button>
+                <button class="menu-btn" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div class="page-header">
+            <h1 class="page-title">👤 Mi perfil</h1>
+            <div class="page-header-actions">
+                <a href="index.html" class="btn-back-home">← Volver al inicio</a>
+            </div>
+        </div>
+
+        <div class="ad-banner-top ad-square">
+            <span class="ad-square-label"><span>Espacio publicitario</span><span class="ad-square-tag">300×80</span></span>
+        </div>
+
+        <section class="profile-header" id="profileHeader">
+            <div class="profile-avatar-wrap">
+                <div class="profile-avatar" id="profileAvatar">
+                    <span id="profileAvatarInitials">?</span>
+                    <img id="profileAvatarImg" alt="" style="display:none;">
+                </div>
+                <button class="profile-avatar-edit" id="editAvatarBtn" title="Cambiar avatar">✎</button>
+                <input type="file" id="avatarInput" accept="image/*" hidden>
+            </div>
+
+            <div class="profile-id">
+                <div class="profile-username-row">
+                    <h2 class="profile-username" id="profileUsername">@usuario</h2>
+                    <button class="profile-edit-btn" id="editNameBtn" title="Editar nombre">✎</button>
+                </div>
+                <p class="profile-joined">Miembro desde <span id="profileJoined">-</span></p>
+
+                <div class="profile-bio-row">
+                    <p class="profile-bio" id="profileBio">Sin biografía todavía.</p>
+                    <button class="profile-edit-btn" id="editBioBtn" title="Editar bio">✎</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📤</div>
+                <div class="stat-value" id="statUploads">0</div>
+                <div class="stat-label">Curis subidos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-value" id="statRated">0</div>
+                <div class="stat-label">Curis calificados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="statAvg">0.0</div>
+                <div class="stat-label">Promedio recibido</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎖️</div>
+                <div class="stat-value" id="statTier" style="font-size:0.95rem;">-</div>
+                <div class="stat-label">Clasificación</div>
+            </div>
+        </section>
+
+        <section class="profile-section rank-section">
+            <div class="profile-section-header">
+                <h3>🎖️ Tu rango de calificador</h3>
+            </div>
+            <div class="rank-row">
+                <div id="rankBadge"><span class="tier-badge tier-E">Novato</span></div>
+                <div class="rank-progress-wrap">
+                    <div class="rank-progress-track"><div class="rank-progress-fill" id="rankProgressFill" style="width:0%;"></div></div>
+                    <p class="hint" id="rankXpLabel">0 / 50 XP para el próximo rango</p>
+                </div>
+            </div>
+            <p class="hint">Ganás 10 XP por cada Curis que calificás.</p>
+        </section>
+
+        <section class="profile-section">
+            <div class="profile-section-header">
+                <h3>📊 Tus números</h3>
+            </div>
+            <div class="profile-detail-grid">
+                <div class="profile-detail-row">
+                    <span>📤 Curis subidos totales</span>
+                    <strong id="detailUploads">0</strong>
+                </div>
+                <div class="profile-detail-row">
+                    <span>⭐ Calificaciones recibidas</span>
+                    <strong id="detailStarsCount">0</strong>
+                </div>
+                <div class="profile-detail-row">
+                    <span>🌟 Estrellas acumuladas</span>
+                    <strong id="detailStarsSum">0.0</strong>
+                </div>
+                <div class="profile-detail-row">
+                    <span>📈 Promedio de tus Curis</span>
+                    <strong id="detailMyAvg">0.0</strong>
+                </div>
+                <div class="profile-detail-row">
+                    <span>🏅 Posición en el ranking</span>
+                    <strong id="detailRank">#-</strong>
+                </div>
+            </div>
+            <div class="incentive-box" style="margin-top:1rem;">
+                <div class="incentive-icon">💡</div>
+                <div class="incentive-text">
+                    <strong>Tus estrellas importan</strong>
+                    <p>Cada estrella que recibes empuja tu posición en el ranking general.</p>
+                    <p>El ranking y los premios se recalculan cada 12 horas.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-section">
+            <div class="profile-section-header">
+                <h3>🖼️ Mis Curis</h3>
+                <a href="subir.html" class="btn-secondary btn-small">+ Subir nuevo</a>
+            </div>
+
+            <div class="profile-gallery" id="profileGallery"></div>
+
+            <div class="profile-empty" id="profileEmpty" style="display:none;">
+                <div class="profile-empty-icon">📭</div>
+                <p>Aún no has subido ningún Curis.</p>
+                <a href="subir.html" class="btn-primary btn-confirm">Sube tu primer Curis</a>
+            </div>
+        </section>
+
+        <section class="profile-section">
+            <div class="profile-section-header">
+                <h3>⚙️ Configuración</h3>
+            </div>
+            <div class="profile-settings">
+                <div class="profile-setting-row">
+                    <div>
+                        <strong>Cerrar sesión</strong>
+                        <p class="hint">Salir de tu cuenta en este dispositivo.</p>
+                    </div>
+                    <button class="btn-secondary btn-danger" id="settingsLogoutBtn">Cerrar sesión</button>
+                </div>
+                <div class="profile-setting-row">
+                    <div>
+                        <strong>Eliminar cuenta</strong>
+                        <p class="hint">Borra tu perfil local y todos tus Curis. Esta acción no se puede deshacer.</p>
+                    </div>
+                    <button class="btn-secondary btn-danger-strong" id="settingsDeleteBtn">Eliminar cuenta</button>
+                </div>
+            </div>
+        </section>
+
+        <div class="ad-banner-bottom ad-square">
+            <span class="ad-square-label"><span>Espacio publicitario</span><span class="ad-square-tag">300×80</span></span>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <a href="legal.html">Privacidad y Términos</a>
+        <span>·</span>
+        <span>CurisFandom</span>
+    </footer>
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Inicia sesión para continuar</h2>
+            <p id="loginMessage">Necesitas iniciar sesión para ver tu perfil.</p>
+            <button class="btn-google btn-google-big" id="modalGoogleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="other-methods" style="opacity:.4;pointer-events:none;">
+                <p class="hint">Otros métodos próximamente</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="editNameModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Editar nombre</h2>
+            <p>Tu nombre aparecerá cuando subas o califiques Curis.</p>
+            <input type="text" id="editNameInput" placeholder="Tu nombre" maxlength="20">
+            <div class="modal-actions">
+                <button class="btn-secondary" data-close>Cancelar</button>
+                <button class="btn-primary" id="saveNameProfileBtn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="editBioModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Editar biografía</h2>
+            <p>Cuéntale al mundo quién eres (máx. 150 caracteres).</p>
+            <textarea id="editBioInput" rows="4" maxlength="150" placeholder="Escribe algo sobre ti..."></textarea>
+            <div class="char-counter"><span id="bioCharCount">0</span>/150</div>
+            <div class="modal-actions">
+                <button class="btn-secondary" data-close>Cancelar</button>
+                <button class="btn-primary" id="saveBioBtn">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="profileImageModal">
+        <div class="modal-content modal-wide">
+            <button class="modal-close" data-close>×</button>
+            <div class="image-viewer" id="profileImageViewer"></div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="chooseNameModal">
+        <div class="modal-content">
+            <h2>Elige tu nombre</h2>
+            <p>Este será el nombre que aparecerá cuando subas tus Curis.</p>
+            <input type="text" id="usernameInput" placeholder="Escribe tu nombre de usuario" maxlength="20">
+            <button class="btn-primary" id="saveNameBtn">Guardar nombre</button>
+        </div>
+    </div>
+
+
+    <div class="modal" id="accountModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Mi cuenta</h2>
+            <p><strong>Usuario:</strong> <span id="accName">@</span></p>
+            <p><strong>ID:</strong> <span id="accId">-</span></p>
+            <p><strong>Fecha de registro:</strong> <span id="accDate">-</span></p>
+            <p><strong>Curis subidos:</strong> <span id="accUploads">0</span></p>
+            <p><strong>Curis calificados:</strong> <span id="accRated">0</span></p>
+            <a href="perfil.html" class="btn-primary" style="margin-top:1rem; display:inline-block; text-align:center; text-decoration:none;">Ver perfil completo</a>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="app.js"></script>
+    <script>document.body.dataset.page = 'profile';</script>
+    <script src="animated-bg.js?v=7"></script>
+</body>
+</html>

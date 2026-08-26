@@ -1,0 +1,17 @@
+{
+  "name": "curisfandom",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Backend de CurisFandom (servidor Express, base de datos y almacenamiento de imágenes en Supabase).",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "google-auth-library": "^11.0.2"
+  }
+}

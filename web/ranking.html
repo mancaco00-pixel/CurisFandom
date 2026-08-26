@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking de Curis - CurisFandom</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <header class="top-bar">
+        <a href="index.html" class="logo-mini">
+            <span class="logo-c">C</span>uris<span class="logo-fandom">Fandom</span>
+        </a>
+
+        <div class="user-area" id="userArea">
+            <span class="user-name" id="userName">Invitado</span>
+            <div class="avatar" id="userAvatar">👤</div>
+            <button class="btn-google" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="user-menu" id="userMenu" style="display:none;">
+                <button class="menu-btn" id="myAccountBtn">Mi cuenta</button>
+                <button class="menu-btn" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h1 class="page-title">🏆 RANKING DE JUGADORES</h1>
+            <div class="page-header-actions">
+                <a href="index.html" class="btn-back-home">← Volver al inicio</a>
+            </div>
+        </div>
+
+        <div class="ad-banner-top ad-square">
+            <span class="ad-square-label"><span>Espacio publicitario</span><span class="ad-square-tag">300×80</span></span>
+        </div>
+
+        <div class="prize-card">
+            <div class="prize-card-header">
+                <span class="prize-card-icon">💰</span>
+                <div>
+                    <div class="prize-card-title">Premios del podio</div>
+                    <div class="prize-card-subtitle">Efectivo para el top 3 al cerrar el ciclo</div>
+                </div>
+            </div>
+            <div class="prize-card-amount">
+                🥇 $10 · 🥈 $5 · 🥉 $2 <span class="prize-card-currency">USD</span>
+            </div>
+            <div class="prize-card-meta">
+                <div class="prize-meta-row">
+                    <span>🕒 Última actualización:</span>
+                    <strong id="prizeUpdatedAt">-</strong>
+                </div>
+                <div class="prize-meta-row">
+                    <span>⏳ Próxima actualización:</span>
+                    <strong id="prizeCountdown">12h 0m</strong>
+                </div>
+            </div>
+            <div class="prize-card-hint">
+                Los premios son fijos: <strong>$10</strong> para el primer puesto, <strong>$5</strong> para el segundo
+                y <strong>$2</strong> para el tercero. El ranking se recalcula cada 12 horas.
+            </div>
+        </div>
+
+        <div class="incentive-box">
+            <div class="incentive-icon">🚀</div>
+            <div class="incentive-text">
+                <strong>¡Sube Curis y compite por el premio!</strong>
+                <p>El primer puesto del ranking gana dinero en efectivo. Las estrellas de tu Curis se promedian y empujan tu posición.</p>
+                <p>El ranking se recalcula cada 12 horas; entre más alta sea tu posición, más cerca del efectivo estás.</p>
+            </div>
+        </div>
+
+        <div class="update-note">
+            <span class="update-note-icon">🕒</span>
+            <span>Las estrellas del ranking se actualizan automáticamente cada <strong>12 horas</strong>.
+            Próxima actualización en: <strong id="rankUpdateNext">12h 0m</strong>.</span>
+        </div>
+
+        <div class="ranking-table-wrap">
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th class="col-pos">#</th>
+                        <th class="col-name">Jugador</th>
+                        <th class="col-tier">Clasificación</th>
+                        <th class="col-avg">Promedio</th>
+                        <th class="col-count">Calificaciones</th>
+                    </tr>
+                </thead>
+                <tbody id="rankingList"></tbody>
+            </table>
+        </div>
+
+        <div class="ad-banner-bottom ad-square">
+            <span class="ad-square-label"><span>Espacio publicitario</span><span class="ad-square-tag">300×80</span></span>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <a href="legal.html">Privacidad y Términos</a>
+        <span>·</span>
+        <span>CurisFandom</span>
+    </footer>
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+
+    <div class="modal" id="imageViewerModal">
+        <div class="modal-content modal-wide">
+            <button class="modal-close" data-close>×</button>
+            <div class="image-viewer" id="imageViewer"></div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Inicia sesión para continuar</h2>
+            <p id="loginMessage">Para acciones dentro de la plataforma necesitas iniciar sesión.</p>
+            <button class="btn-google btn-google-big" id="modalGoogleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="other-methods" style="opacity:.4;pointer-events:none;">
+                <p class="hint">Otros métodos próximamente</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal" id="chooseNameModal">
+        <div class="modal-content">
+            <h2>Elige tu nombre</h2>
+            <p>Este será el nombre que aparecerá cuando subas tus Curis.</p>
+            <input type="text" id="usernameInput" placeholder="Escribe tu nombre de usuario" maxlength="20">
+            <button class="btn-primary" id="saveNameBtn">Guardar nombre</button>
+        </div>
+    </div>
+
+
+    <div class="modal" id="accountModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Mi cuenta</h2>
+            <p><strong>Usuario:</strong> <span id="accName">@</span></p>
+            <p><strong>ID:</strong> <span id="accId">-</span></p>
+            <p><strong>Fecha de registro:</strong> <span id="accDate">-</span></p>
+            <p><strong>Curis subidos:</strong> <span id="accUploads">0</span></p>
+            <p><strong>Curis calificados:</strong> <span id="accRated">0</span></p>
+            <p class="hint" style="margin-top:1rem;">El perfil completo estará disponible próximamente.</p>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="app.js"></script>
+    <script>document.body.dataset.page = 'ranking';</script>
+    <script src="animated-bg.js?v=7"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+node_modules/
+
+# Secretos y valores locales — nunca subir esto a GitHub.
+.env
+.env.*
+!.env.example
+
+.playwright-mcp/
+
+# Notas personales de avance del proyecto (no son parte de la app).
+AVANCE_PROYECTO.txt
+AVANCE_NUEVO.txt
+CurisFandom.odt
+handoff.md

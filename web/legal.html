@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacidad y Términos - CurisFandom</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <header class="top-bar">
+        <a href="index.html" class="logo-mini">
+            <span class="logo-c">C</span>uris<span class="logo-fandom">Fandom</span>
+        </a>
+
+        <div class="user-area" id="userArea">
+            <span class="user-name" id="userName">Invitado</span>
+            <div class="avatar" id="userAvatar">👤</div>
+            <button class="btn-google" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="user-menu" id="userMenu" style="display:none;">
+                <button class="menu-btn" id="myAccountBtn">Mi cuenta</button>
+                <button class="menu-btn" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+
+        <div class="page-header">
+            <h1 class="page-title">📄 Privacidad y Términos</h1>
+            <div class="page-header-actions">
+                <a href="index.html" class="btn-back-home">← Volver al inicio</a>
+            </div>
+        </div>
+
+        <section class="profile-section legal-content">
+            <p class="legal-updated">Última actualización: 24 de agosto de 2026.</p>
+
+            <div class="legal-quicknav">
+                <a href="#privacidad">Política de privacidad</a>
+                <a href="#terminos">Términos de uso</a>
+            </div>
+
+            <h2 id="privacidad">Política de privacidad</h2>
+
+            <p>CurisFandom es un proyecto pequeño e independiente donde podés subir
+            imágenes ("Curis"), calificarlas y ver un ranking. Esta página explica,
+            en criollo, qué datos guardamos y para qué.</p>
+
+            <p><strong>Qué guardamos cuando iniciás sesión con Google:</strong> tu
+            token de Google se verifica contra los servidores de Google para
+            confirmar que sos vos, pero <strong>no guardamos tu email ni tu nombre
+            real de Google</strong> en nuestra base de datos. Solo guardamos un
+            identificador interno derivado de tu cuenta (no reversible a tu email
+            desde nuestro lado) y el nombre de usuario que vos elegís al entrar por
+            primera vez.</p>
+
+            <p><strong>Qué más guardamos:</strong></p>
+            <ul>
+                <li>Las imágenes que subís, su estado de moderación (pendiente,
+                    aprobado o rechazado) y el promedio de estrellas que reciben.</li>
+                <li>Las calificaciones (estrellas) que das a Curis de otras personas
+                    y las que recibís en los tuyos.</li>
+                <li>Un contador diario de estrellas usadas, para aplicar el límite de
+                    calificación (50 por día, ampliable a 120 viendo un anuncio).</li>
+            </ul>
+
+            <p>La foto de perfil y la biografía de tu perfil se guardan solo en el
+            almacenamiento local de tu propio navegador (no en nuestro servidor), así
+            que si entrás desde otro dispositivo no las vas a ver ahí.</p>
+
+            <p><strong>Cookies:</strong> usamos una cookie de sesión firmada para
+            mantenerte identificado mientras navegás (dura 30 días; la del panel de
+            administración dura 12 horas). No es una cookie de rastreo publicitario
+            ni se comparte con terceros.</p>
+
+            <p><strong>Dónde vive todo esto:</strong> la base de datos y las imágenes
+            se alojan en Supabase (Postgres + almacenamiento de archivos). Una nota
+            honesta: mientras un Curis está pendiente de revisión o fue rechazado, no
+            se muestra en ninguna parte del sitio, pero el archivo de imagen en sí no
+            queda en una carpeta privada — solo no está enlazado ni listado en
+            ningún lado hasta que se aprueba.</p>
+
+            <p><strong>Terceros involucrados:</strong> Google (para el login) y
+            Supabase (para alojar los datos e imágenes). Por ahora los espacios de
+            anuncio del sitio son solo de relleno visual — cuando activemos anuncios
+            reales, vamos a actualizar esta política para reflejar qué datos puede
+            llegar a recolectar esa red publicitaria.</p>
+
+            <p><strong>Moderación:</strong> cada imagen subida pasa por revisión
+            manual antes de hacerse pública. Si ves contenido que te parece
+            inapropiado o con derechos de autor ajenos, escribinos (ver contacto más
+            abajo) y lo revisamos.</p>
+
+            <p><strong>Tus datos, tus decisiones:</strong> desde tu perfil podés usar
+            "Eliminar cuenta", que borra los Curis que subiste (con sus imágenes) y
+            cierra tu sesión. Si además querés pedir que se elimine cualquier otro
+            rastro asociado a tu cuenta (por ejemplo, calificaciones que diste a
+            Curis ajenos), escribinos al contacto de abajo y lo resolvemos a mano.</p>
+
+            <p><strong>Menores de edad:</strong> CurisFandom no está pensado para
+            menores de 13 años. Si sabés de una cuenta de alguien menor de esa edad,
+            avisanos y la damos de baja.</p>
+
+            <p><strong>Cambios a esta política:</strong> puede actualizarse a medida
+            que el sitio cambia (por ejemplo, al activar anuncios reales). La fecha
+            de arriba siempre va a reflejar la última actualización.</p>
+
+            <h2 id="terminos">Términos de uso</h2>
+
+            <p>Al usar CurisFandom aceptás estas reglas básicas:</p>
+
+            <p><strong>Qué es el sitio:</strong> una plataforma para subir imágenes
+            ("Curis"), calificarlas con estrellas y ver un ranking de las mejores.</p>
+
+            <p><strong>Reglas de contenido.</strong> No subas contenido:</p>
+            <ul>
+                <li>Ilegal, o que no seas dueño/a de compartir (derechos de autor
+                    ajenos sin permiso).</li>
+                <li>Sexualmente explícito, violento o de odio.</li>
+                <li>Spam o contenido que no tenga nada que ver con el sitio.</li>
+            </ul>
+            <p>El equipo de moderación puede rechazar o eliminar cualquier Curis a su
+            criterio, sin necesidad de justificar cada caso individual.</p>
+
+            <p><strong>Tu cuenta:</strong> sos responsable de mantener el acceso a tu
+            cuenta de Google seguro. Una persona debería usar una sola cuenta; nos
+            reservamos el derecho de anular calificaciones o cuentas si detectamos
+            manipulación del ranking o del sistema de calificaciones.</p>
+
+            <p><strong>Premios del ranking:</strong> los montos fijos que se muestran
+            en la página de ranking ($10 / $5 / $2 USD para el podio) son un
+            incentivo del sitio, sujetos a verificación anti-abuso antes de
+            entregarse, y pueden modificarse o discontinuarse en cualquier momento
+            sin previo aviso.</p>
+
+            <p><strong>Anuncios:</strong> hoy los espacios de anuncio son placeholders
+            visuales, no anuncios reales. Cuando se activen anuncios de verdad (para
+            financiar el sitio y los premios), estos términos se van a actualizar.</p>
+
+            <p><strong>Disponibilidad:</strong> el sitio se ofrece "tal cual", sin
+            garantía de disponibilidad permanente — puede tener cortes o
+            mantenimiento sin aviso previo, como cualquier proyecto chico.</p>
+
+            <p><strong>Responsabilidad:</strong> no nos hacemos responsables por
+            contenido subido por otros usuarios más allá de la moderación razonable
+            que ya hacemos. Si algo se nos pasó, avisanos.</p>
+
+            <p><strong>Contacto:</strong> para consultas de privacidad, reportar
+            contenido o pedir la eliminación de tus datos, escribí a
+            <a href="mailto:mancaco00@gmail.com" style="text-decoration:underline;">mancaco00@gmail.com</a>.</p>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <a href="legal.html">Privacidad y Términos</a>
+        <span>·</span>
+        <span>CurisFandom</span>
+    </footer>
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Inicia sesión para continuar</h2>
+            <p id="loginMessage">Necesitas iniciar sesión para poder calificar Curis.</p>
+            <button class="btn-google btn-google-big" id="modalGoogleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="other-methods" style="opacity:.4;pointer-events:none;">
+                <p class="hint">Otros métodos próximamente</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="chooseNameModal">
+        <div class="modal-content">
+            <h2>Elige tu nombre</h2>
+            <p>Este será el nombre que aparecerá cuando subas tus Curis.</p>
+            <input type="text" id="usernameInput" placeholder="Escribe tu nombre de usuario" maxlength="20">
+            <button class="btn-primary" id="saveNameBtn">Guardar nombre</button>
+        </div>
+    </div>
+
+    <div class="modal" id="accountModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Mi cuenta</h2>
+            <p><strong>Usuario:</strong> <span id="accName">@</span></p>
+            <p><strong>ID:</strong> <span id="accId">-</span></p>
+            <p><strong>Fecha de registro:</strong> <span id="accDate">-</span></p>
+            <p><strong>Curis subidos:</strong> <span id="accUploads">0</span></p>
+            <p><strong>Curis calificados:</strong> <span id="accRated">0</span></p>
+            <a href="perfil.html" class="btn-primary" style="margin-top:1rem; display:inline-block; text-align:center; text-decoration:none;">Ver perfil completo</a>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="app.js"></script>
+    <script src="animated-bg.js?v=7"></script>
+</body>
+</html>

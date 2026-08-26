@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Panel de administración - CurisFandom</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <header class="top-bar">
+        <a href="index.html" class="logo-mini">
+            <span class="logo-c">C</span>uris<span class="logo-fandom">Fandom</span>
+        </a>
+        <div class="user-area">
+            <span class="user-name authenticated">🛡️ Admin</span>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h1 class="page-title">🛡️ Panel de administración</h1>
+            <div class="page-header-actions">
+                <a href="index.html" class="btn-back-home">← Volver al inicio</a>
+            </div>
+        </div>
+
+        <section id="adminGate">
+            <div class="upload-container">
+                <p class="muted" style="margin-bottom:0.75rem;">Ingresá la contraseña de administrador para ver las solicitudes de subida.</p>
+                <input type="password" id="adminPasswordInput" placeholder="Contraseña" autocomplete="off">
+                <button class="btn-primary" id="adminLoginBtn">Entrar</button>
+                <p class="hint" id="adminLoginError" style="display:none; color:var(--danger); margin-top:0.5rem;">Contraseña incorrecta.</p>
+            </div>
+        </section>
+
+        <section id="adminPanel" style="display:none;">
+            <div class="admin-toolbar">
+                <div class="admin-tabs" id="adminTabs">
+                    <button class="admin-tab active" data-status="pending">Pendientes (<span id="countPending">0</span>)</button>
+                    <button class="admin-tab" data-status="approved">Aprobados (<span id="countApproved">0</span>)</button>
+                    <button class="admin-tab" data-status="rejected">Rechazados (<span id="countRejected">0</span>)</button>
+                </div>
+                <button class="btn-secondary btn-small" id="adminLogoutBtn">Salir del panel</button>
+            </div>
+
+            <p class="hint" id="adminSaveStatus" style="display:none; margin-bottom:1rem;"></p>
+
+            <div class="admin-queue" id="adminQueue"></div>
+            <p class="hint" id="adminEmpty" style="display:none; text-align:center; padding:2rem;">No hay Curis en esta categoría.</p>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+    <script>document.body.dataset.page = 'admin';</script>
+    <script src="animated-bg.js?v=7"></script>
+</body>
+</html>
