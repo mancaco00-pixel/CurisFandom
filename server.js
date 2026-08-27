@@ -57,6 +57,10 @@ const CONFIG = {
 
 const CURIS_COLORS = [['#ff3d7f', '#ff7a18'], ['#6c5ce7', '#a29bfe'], ['#00d4ff', '#6c5ce7'], ['#00b894', '#00d4ff'], ['#fdcb6e', '#e17055']];
 
+// País de origen del Curis -- mismos códigos que el <select> de web/subir.html.
+// Whitelist explícita (no solo forma) para no guardar cualquier string.
+const LATAM_COUNTRIES = new Set(['ar', 'bo', 'br', 'cl', 'co', 'cr', 'cu', 'ec', 'sv', 'gt', 'hn', 'mx', 'ni', 'pa', 'py', 'pe', 'do', 'uy', 've']);
+
 const app = express();
 app.use(express.json({ limit: '8mb' }));
 app.use(express.static(WEB_DIR));
@@ -156,7 +160,8 @@ function toPublicCuris(c) {
         avg: c.avg,
         count: c.count,
         publishedAt: c.published_at,
-        musicTrack: c.music_track || null
+        musicTrack: c.music_track || null,
+        country: c.country || null
     };
 }
 
@@ -247,6 +252,11 @@ app.post('/api/curis', requireUser, asyncRoute(async (req, res) => {
     let musicTrack = req.body.musicTrack;
     if (typeof musicTrack !== 'string' || !/^[a-z0-9-]{1,60}$/.test(musicTrack)) musicTrack = null;
 
+    // country: de dónde viene el Curis / quién lo sube -- opcional, se
+    // valida contra la whitelist de LATAM_COUNTRIES, nunca se guarda texto libre.
+    let country = req.body.country;
+    if (typeof country !== 'string' || !LATAM_COUNTRIES.has(country)) country = null;
+
     const id = 'c_' + crypto.randomBytes(6).toString('hex');
     let imageFile;
     try {
@@ -255,7 +265,7 @@ app.post('/api/curis', requireUser, asyncRoute(async (req, res) => {
         return res.status(400).json({ ok: false, error: e.message });
     }
     const [color1, color2] = CURIS_COLORS[Math.floor(Math.random() * CURIS_COLORS.length)];
-    await db.createCuris({ id, creatorId: req.userId, creatorName: user.name, imageFile, color1, color2, musicTrack });
+    await db.createCuris({ id, creatorId: req.userId, creatorName: user.name, imageFile, color1, color2, musicTrack, country });
     res.json({ ok: true, id });
 }));
 

@@ -44,13 +44,14 @@ async function setUserName(id, name) {
     });
 }
 
-async function createCuris({ id, creatorId, creatorName, imageFile, color1, color2, musicTrack }) {
+async function createCuris({ id, creatorId, creatorName, imageFile, color1, color2, musicTrack, country }) {
     await request('/curis', {
         method: 'POST',
         headers: { Prefer: 'return=minimal' },
         body: JSON.stringify({
             id, creator_id: creatorId, creator_name: creatorName, image_file: imageFile,
-            color1, color2, status: 'pending', avg: 0, count: 0, music_track: musicTrack || null
+            color1, color2, status: 'pending', avg: 0, count: 0, music_track: musicTrack || null,
+            country: country || null
         })
     });
 }

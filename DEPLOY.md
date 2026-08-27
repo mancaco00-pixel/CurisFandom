@@ -2,13 +2,16 @@
 
 ## 0. Antes que nada: correr esta migración en Supabase
 
-La función de música de fondo (elegís una canción al subir un Curis)
-guarda un dato nuevo por Curis que la tabla `curis` de Supabase todavía no
-tiene. Sin este paso, subir un Curis con música va a fallar. Correr una
-sola vez en el SQL Editor del dashboard de Supabase:
+Dos funciones guardan un dato nuevo por Curis que la tabla `curis` de
+Supabase todavía no tiene: la música de fondo (elegís una canción al subir
+un Curis) y el país de origen (de dónde viene el Curis / quién lo sube,
+selector de Latinoamérica en subir.html). Sin este paso, subir un Curis
+con música o país va a fallar. Correr una sola vez en el SQL Editor del
+dashboard de Supabase:
 
 ```sql
 ALTER TABLE curis ADD COLUMN IF NOT EXISTS music_track text;
+ALTER TABLE curis ADD COLUMN IF NOT EXISTS country text;
 ```
 
 No hace falta ninguna otra migración: el resto de los cambios de esta

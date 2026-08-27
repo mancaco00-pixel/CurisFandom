@@ -1,28 +1,44 @@
 (function(){
-    const bg = document.getElementById('bg');
-    if (!bg) return;
+    const host = document.getElementById('bg');
+    if (!host) return;
 
-    // En pantallas táctiles (celulares/tablets, la mayoría de los
-    // "dispositivos malos") este efecto reactivo al mouse no aporta nada
-    // real -- no hay cursor que sobrevuele la grilla -- y arrastrar el dedo
-    // para hacer scroll disparaba touchmove todo el tiempo, haciendo que
-    // scrollear se sintiera lento. Se desactiva del todo ahí: ni se
-    // construye la grilla ni se arranca el loop de animación.
+    // En pantallas táctiles no hay cursor que sobrevuele la grilla y el
+    // touchmove durante el scroll lo hacía ir lento -> desactivado del todo.
     const isCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
     if (isCoarsePointer) return;
 
-    bg.style.position = 'fixed';
-    bg.style.inset = '0';
-    bg.style.width = '100vw';
-    bg.style.height = '100vh';
-    bg.style.zIndex = '0';
-    bg.style.overflow = 'hidden';
-    bg.style.pointerEvents = 'none';
+    // Si el usuario pidió menos movimiento a nivel sistema, se respeta.
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+
+    // ------------------------------------------------------------------
+    // Fondo de grilla, reescrito para que NO genere lag:
+    //   * la grilla base se dibuja UNA sola vez en un canvas offscreen y
+    //     cada frame se copia de un saque (drawImage) -- no se re-trazan
+    //     las ~900 celdas por frame;
+    //   * las celdas cerca del mouse solo BRILLAN (glow por capas de relleno
+    //     translúcido) -- ya no se agrandan/escalan, que era lo que obligaba
+    //     a repintar zonas grandes;
+    //   * sin shadowBlur (es de lo más caro del canvas 2D);
+    //   * el loop se DETIENE con el mouse quieto y se reanuda al moverlo;
+    //   * devicePixelRatio limitado a 1.5, y todo se corta si la pestaña
+    //     pasa a segundo plano.
+    // ------------------------------------------------------------------
+
+    const canvas = document.createElement('canvas');
+    canvas.style.cssText = 'position:fixed;inset:0;width:100vw;height:100vh;display:block;pointer-events:none;';
+    host.innerHTML = '';
+    host.appendChild(canvas);
+    const ctx = canvas.getContext('2d');
+
+    const grid = document.createElement('canvas');
+    const gctx = grid.getContext('2d');
 
     const SIZE = 36;
     const GAP = 14;
     const STEP = SIZE + GAP;
     const RADIUS = 140;
+    const RADIUS2 = RADIUS * RADIUS;
 
     const COLORS = [
         [0, 255, 255],
@@ -32,134 +48,157 @@
         [0, 255, 180]
     ];
 
-    let cells = [];
+    let dpr = 1;
+    let cssW = 0, cssH = 0;
     let cols = 0, rows = 0;
     let mouseX = -9999, mouseY = -9999;
+    let running = false;
+    let rafId = 0;
+    let idleFrames = 0;
 
-    // Solo se procesan las celdas que están activas o recién dejaron de
-    // estarlo (fade-out en curso). Antes se recorrían y reescribían los
-    // estilos de TODAS las celdas de la grilla (cientos en pantallas
-    // grandes) 60 veces por segundo, estén o no cerca del mouse -- eso era
-    // el mayor costo de CPU/repintado de toda la página.
-    let trackedIndices = new Set();
+    const active = new Map(); // indice -> intensidad (0..1)
 
-    function build(){
-        bg.innerHTML = '';
-        cells = [];
-        trackedIndices.clear();
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        cols = Math.ceil(w / STEP) + 1;
-        rows = Math.ceil(h / STEP) + 1;
+    function colorFor(x, y){
+        return COLORS[(x + y) % COLORS.length];
+    }
+
+    function resize(){
+        cssW = window.innerWidth;
+        cssH = window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
+        canvas.width = grid.width = Math.round(cssW * dpr);
+        canvas.height = grid.height = Math.round(cssH * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        cols = Math.ceil(cssW / STEP) + 1;
+        rows = Math.ceil(cssH / STEP) + 1;
+
+        // Grilla base: una sola vez.
+        gctx.clearRect(0, 0, cssW, cssH);
+        gctx.lineWidth = 1;
+        gctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        gctx.beginPath();
         for (let y = 0; y < rows; y++){
+            const py = y * STEP + 0.5;
             for (let x = 0; x < cols; x++){
-                const c = document.createElement('div');
-                const px = x * STEP;
-                const py = y * STEP;
-                const colorIdx = (x + y) % COLORS.length;
-                const col = COLORS[colorIdx];
-
-                c.style.position = 'absolute';
-                c.style.width = SIZE + 'px';
-                c.style.height = SIZE + 'px';
-                c.style.left = px + 'px';
-                c.style.top = py + 'px';
-                c.style.border = '1px solid rgba(255,255,255,0.08)';
-                c.style.borderRadius = '4px';
-                c.style.boxSizing = 'border-box';
-                c.style.transformOrigin = 'center';
-                c.style.transition = 'all 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
-                bg.appendChild(c);
-                cells.push({
-                    el: c,
-                    cx: px + SIZE / 2,
-                    cy: py + SIZE / 2,
-                    col: col,
-                    intensity: 0
-                });
+                gctx.rect(x * STEP + 0.5, py, SIZE, SIZE);
             }
         }
+        gctx.stroke();
+
+        render();
     }
 
-    // En vez de recorrer las ~500+ celdas de toda la grilla, calcula solo
-    // las columnas/filas dentro del radio de influencia alrededor del mouse
-    // (unas pocas decenas como mucho) y las agrega al set a animar.
-    function markNearbyActive(){
-        const colCenter = mouseX / STEP;
-        const rowCenter = mouseY / STEP;
+    function markNearby(){
+        if (mouseX <= -9999) return;
         const spread = Math.ceil(RADIUS / STEP) + 1;
-        const xStart = Math.max(0, Math.floor(colCenter - spread));
-        const xEnd = Math.min(cols - 1, Math.ceil(colCenter + spread));
-        const yStart = Math.max(0, Math.floor(rowCenter - spread));
-        const yEnd = Math.min(rows - 1, Math.ceil(rowCenter + spread));
-        for (let y = yStart; y <= yEnd; y++){
-            for (let x = xStart; x <= xEnd; x++){
-                trackedIndices.add(y * cols + x);
+        const cx = Math.round(mouseX / STEP);
+        const cy = Math.round(mouseY / STEP);
+        const xs = Math.max(0, cx - spread), xe = Math.min(cols - 1, cx + spread);
+        const ys = Math.max(0, cy - spread), ye = Math.min(rows - 1, cy + spread);
+        for (let y = ys; y <= ye; y++){
+            for (let x = xs; x <= xe; x++){
+                const i = y * cols + x;
+                if (!active.has(i)) active.set(i, 0);
             }
         }
     }
 
-    function animate(){
-        if (mouseX > -9999) markNearbyActive();
+    function render(){
+        ctx.clearRect(0, 0, cssW, cssH);
+        ctx.drawImage(grid, 0, 0, cssW, cssH);
 
-        trackedIndices.forEach(function(i){
-            const c = cells[i];
-            if (!c) { trackedIndices.delete(i); return; }
-            const dx = c.cx - mouseX;
-            const dy = c.cy - mouseY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+        active.forEach(function(I, i){
+            if (I <= 0.01) return;
+            const x = i % cols;
+            const y = (i - x) / cols;
+            const px = x * STEP;
+            const py = y * STEP;
+            const col = colorFor(x, y);
+            const rgb = col[0] + ',' + col[1] + ',' + col[2];
 
-            if (dist < RADIUS){
-                const t = 1 - dist / RADIUS;
-                const target = t * t;
-                c.intensity += (target - c.intensity) * 0.12;
-            } else {
-                c.intensity += (0 - c.intensity) * 0.08;
+            // Glow por capas: sin escalar la celda, solo halos translúcidos
+            // alrededor del cuadrado en su tamaño real.
+            ctx.fillStyle = 'rgba(' + rgb + ',' + (I * 0.06).toFixed(3) + ')';
+            ctx.fillRect(px - 10, py - 10, SIZE + 20, SIZE + 20);
+            ctx.fillStyle = 'rgba(' + rgb + ',' + (I * 0.12).toFixed(3) + ')';
+            ctx.fillRect(px - 4, py - 4, SIZE + 8, SIZE + 8);
+            ctx.fillStyle = 'rgba(' + rgb + ',' + (I * 0.20).toFixed(3) + ')';
+            ctx.fillRect(px, py, SIZE, SIZE);
+
+            ctx.lineWidth = 1 + I;
+            ctx.strokeStyle = 'rgba(' + rgb + ',' + (0.08 + I * 0.8).toFixed(3) + ')';
+            ctx.strokeRect(px + 0.5, py + 0.5, SIZE, SIZE);
+        });
+    }
+
+    function tick(){
+        markNearby();
+
+        let anyActive = false;
+        active.forEach(function(I, i){
+            const x = i % cols;
+            const y = (i - x) / cols;
+            const dx = (x * STEP + SIZE / 2) - mouseX;
+            const dy = (y * STEP + SIZE / 2) - mouseY;
+            const d2 = dx * dx + dy * dy;
+
+            let target = 0;
+            if (d2 < RADIUS2){
+                const t = 1 - Math.sqrt(d2) / RADIUS;
+                target = t * t;
             }
+            I += (target - I) * (target > I ? 0.14 : 0.08);
 
-            if (c.intensity > 0.01){
-                // Picos de brillo/blur bajados un poco (antes 0.92/0.7/20px)
-                // para que el efecto sea vistoso pero no encandile.
-                const I = c.intensity;
-                const r = c.col[0];
-                const g = c.col[1];
-                const b = c.col[2];
-                const alpha = (0.08 + I * 0.7).toFixed(2);
-                const glowAlpha = (I * 0.5).toFixed(2);
-                const scale = (1 + I * 0.4).toFixed(3);
-                const bw = (1 + I * 2).toFixed(1);
-                const blur = (I * 12).toFixed(0);
-
-                c.el.style.borderColor = 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
-                c.el.style.backgroundColor = 'rgba(' + r + ',' + g + ',' + b + ',' + (I * 0.12).toFixed(2) + ')';
-                c.el.style.transform = 'scale(' + scale + ')';
-                c.el.style.boxShadow = '0 0 ' + blur + 'px rgba(' + r + ',' + g + ',' + b + ',' + glowAlpha + '), inset 0 0 ' + (I * 6).toFixed(0) + 'px rgba(' + r + ',' + g + ',' + b + ',' + (I * 0.22).toFixed(2) + ')';
-                c.el.style.borderWidth = bw + 'px';
-                c.el.style.borderRadius = '6px';
+            if (I < 0.01 && target === 0){
+                active.delete(i);
             } else {
-                c.el.style.borderColor = 'rgba(255,255,255,0.08)';
-                c.el.style.backgroundColor = 'transparent';
-                c.el.style.transform = 'scale(1)';
-                c.el.style.boxShadow = 'none';
-                c.el.style.borderWidth = '1px';
-                trackedIndices.delete(i);
+                active.set(i, I);
+                anyActive = true;
             }
         });
-        requestAnimationFrame(animate);
+
+        render();
+
+        if (!anyActive) {
+            if (++idleFrames > 30) { stop(); return; }
+        } else {
+            idleFrames = 0;
+        }
+        rafId = requestAnimationFrame(tick);
+    }
+
+    function start(){
+        if (running) return;
+        running = true;
+        idleFrames = 0;
+        rafId = requestAnimationFrame(tick);
+    }
+
+    function stop(){
+        running = false;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = 0;
     }
 
     window.addEventListener('mousemove', function(e){
         mouseX = e.clientX;
         mouseY = e.clientY;
-    });
+        start();
+    }, { passive: true });
 
     window.addEventListener('mouseleave', function(){
         mouseX = -9999;
         mouseY = -9999;
     });
 
-    window.addEventListener('resize', build);
+    window.addEventListener('resize', resize);
 
-    build();
-    animate();
+    document.addEventListener('visibilitychange', function(){
+        if (document.hidden) stop();
+    });
+
+    resize();
 })();

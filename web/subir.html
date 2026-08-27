@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3413374034507030"
+     crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -74,6 +76,32 @@
             <div class="upload-preview" id="uploadPreview" style="display:none;">
                 <h3>Vista previa</h3>
                 <img id="previewImg" alt="preview">
+
+                <div class="country-picker">
+                    <label for="countrySelect">🌎 ¿De dónde viene tu Curis?</label>
+                    <select id="countrySelect">
+                        <option value="">Prefiero no decirlo</option>
+                        <option value="ar">🇦🇷 Argentina</option>
+                        <option value="bo">🇧🇴 Bolivia</option>
+                        <option value="br">🇧🇷 Brasil</option>
+                        <option value="cl">🇨🇱 Chile</option>
+                        <option value="co">🇨🇴 Colombia</option>
+                        <option value="cr">🇨🇷 Costa Rica</option>
+                        <option value="cu">🇨🇺 Cuba</option>
+                        <option value="ec">🇪🇨 Ecuador</option>
+                        <option value="sv">🇸🇻 El Salvador</option>
+                        <option value="gt">🇬🇹 Guatemala</option>
+                        <option value="hn">🇭🇳 Honduras</option>
+                        <option value="mx">🇲🇽 México</option>
+                        <option value="ni">🇳🇮 Nicaragua</option>
+                        <option value="pa">🇵🇦 Panamá</option>
+                        <option value="py">🇵🇾 Paraguay</option>
+                        <option value="pe">🇵🇪 Perú</option>
+                        <option value="do">🇩🇴 República Dominicana</option>
+                        <option value="uy">🇺🇾 Uruguay</option>
+                        <option value="ve">🇻🇪 Venezuela</option>
+                    </select>
+                </div>
 
                 <div class="music-picker">
                     <label for="musicSelect">🎵 Música de fondo (opcional)</label>
@@ -174,6 +202,6 @@
     <script src="music-library.js"></script>
     <script src="app.js"></script>
     <script>document.body.dataset.page = 'upload';</script>
-    <script src="animated-bg.js?v=7"></script>
+    <script src="animated-bg.js?v=9"></script>
 </body>
 </html>

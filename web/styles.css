@@ -1720,14 +1720,16 @@ select:focus {
     border-color: var(--primary);
 }
 
-.music-picker {
+.music-picker,
+.country-picker {
     width: 100%;
     max-width: 420px;
     margin: 1rem auto;
     text-align: left;
 }
 
-.music-picker label {
+.music-picker label,
+.country-picker label {
     display: block;
     font-size: 0.85rem;
     color: var(--text-muted);

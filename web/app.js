@@ -517,7 +517,8 @@
         if (value) value.style.display = 'block';
         if (actions) actions.style.display = 'flex';
 
-        $('rateCreator').textContent = '@' + curis.creator;
+        const country = findCountry(curis.country);
+        $('rateCreator').textContent = (country ? country.flag + ' ' : '') + '@' + curis.creator;
         const img = $('curisImage');
         if (curis.imageFile) {
             img.style.background = `url('${curis.imageFile}') center/cover no-repeat`;
@@ -795,6 +796,37 @@
         return window.MUSIC_LIBRARY.find(t => t.id === id) || null;
     }
 
+    // País de origen del Curis (de dónde viene / quién lo sube) -- lista
+    // fija de Latinoamérica, mismos códigos que valida server.js. Solo se
+    // guarda el código de 2 letras, nunca la bandera/etiqueta, para poder
+    // ajustar el texto sin tocar Curis ya publicados.
+    const COUNTRIES = [
+        { id: 'ar', flag: '🇦🇷', label: 'Argentina' },
+        { id: 'bo', flag: '🇧🇴', label: 'Bolivia' },
+        { id: 'br', flag: '🇧🇷', label: 'Brasil' },
+        { id: 'cl', flag: '🇨🇱', label: 'Chile' },
+        { id: 'co', flag: '🇨🇴', label: 'Colombia' },
+        { id: 'cr', flag: '🇨🇷', label: 'Costa Rica' },
+        { id: 'cu', flag: '🇨🇺', label: 'Cuba' },
+        { id: 'ec', flag: '🇪🇨', label: 'Ecuador' },
+        { id: 'sv', flag: '🇸🇻', label: 'El Salvador' },
+        { id: 'gt', flag: '🇬🇹', label: 'Guatemala' },
+        { id: 'hn', flag: '🇭🇳', label: 'Honduras' },
+        { id: 'mx', flag: '🇲🇽', label: 'México' },
+        { id: 'ni', flag: '🇳🇮', label: 'Nicaragua' },
+        { id: 'pa', flag: '🇵🇦', label: 'Panamá' },
+        { id: 'py', flag: '🇵🇾', label: 'Paraguay' },
+        { id: 'pe', flag: '🇵🇪', label: 'Perú' },
+        { id: 'do', flag: '🇩🇴', label: 'República Dominicana' },
+        { id: 'uy', flag: '🇺🇾', label: 'Uruguay' },
+        { id: 've', flag: '🇻🇪', label: 'Venezuela' }
+    ];
+
+    function findCountry(id) {
+        if (!id) return null;
+        return COUNTRIES.find(c => c.id === id) || null;
+    }
+
     function populateMusicSelect() {
         const select = $('musicSelect');
         const emptyHint = $('musicEmptyHint');
@@ -875,7 +907,9 @@
         if (!dataUrl) return;
         const musicSelect = $('musicSelect');
         const musicTrack = musicSelect ? musicSelect.value : '';
-        api('/curis', { method: 'POST', body: JSON.stringify({ imageData: dataUrl, musicTrack }) })
+        const countrySelect = $('countrySelect');
+        const country = countrySelect ? countrySelect.value : '';
+        api('/curis', { method: 'POST', body: JSON.stringify({ imageData: dataUrl, musicTrack, country }) })
             .then(() => {
                 setTimeout(() => openModal('successModal'), 200);
             })
