@@ -16,6 +16,12 @@
  * server.js).
  */
 
+// aws4fetch firma con la Web Crypto API global (globalThis.crypto). Node la
+// expone como global recién en v20+; en v18 hay que asignarla a mano desde el
+// módulo 'crypto' o aws4fetch tira "ReferenceError: crypto is not defined" al
+// firmar. En Node 20+ esto es un no-op.
+if (!globalThis.crypto) globalThis.crypto = require('crypto').webcrypto;
+
 const { AwsClient } = require('aws4fetch');
 
 const ACCOUNT_ID = process.env.R2_ACCOUNT_ID;

@@ -358,6 +358,22 @@ app.post('/api/admin/curis/:id/status', requireAdmin, asyncRoute(async (req, res
     const c = await db.getCurisById(req.params.id);
     if (!c) return res.status(404).json({ ok: false, error: 'No encontrado.' });
     await db.setCurisStatus(c.id, status);
+    // Al rechazar, la imagen no se muestra más en ningún lado -> se borra de
+    // R2 para no gastar espacio del bucket. El registro queda (status
+    // 'rejected', con su degradado de color como fallback visual). Borrar el
+    // objeto de R2 es lo importante; limpiar la key en la base es best-effort
+    // (si falla, queda una key colgada pero el espacio ya se liberó).
+    if (status === 'rejected' && c.image_file) {
+        await storage.deleteFiles(c.image_file);
+        try {
+            // Cadena vacía, no null: la columna image_file es NOT NULL. Tanto
+            // r2.publicUrl() como el frontend tratan '' como "sin imagen" y
+            // caen al degradado de color.
+            await db.setCurisImage(c.id, '');
+        } catch (e) {
+            console.error('No se pudo limpiar image_file tras rechazar', c.id, e);
+        }
+    }
     res.json({ ok: true });
 }));
 

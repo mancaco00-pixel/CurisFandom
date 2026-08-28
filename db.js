@@ -112,6 +112,18 @@ async function setCurisStatus(id, status) {
     });
 }
 
+// Usado al rechazar un Curis: la imagen ya no se muestra en ningún lado, se
+// borra de R2 (server.js) y acá se limpia la referencia para no dejar una
+// key colgada apuntando a un objeto que ya no existe. Se pasa '' (no null):
+// la columna image_file es NOT NULL.
+async function setCurisImage(id, imageFile) {
+    await request('/curis' + qs({ id: `eq.${id}` }), {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ image_file: imageFile })
+    });
+}
+
 async function getDailyStars(userId, date) {
     const rows = await request('/daily_stars' + qs({ user_id: `eq.${userId}`, date: `eq.${date}`, select: '*' }));
     return rows[0] || null;
@@ -188,6 +200,7 @@ module.exports = {
     listByStatus,
     statusCounts,
     setCurisStatus,
+    setCurisImage,
     getDailyStars,
     ensureDailyStars,
     setDailyStarsExtended,

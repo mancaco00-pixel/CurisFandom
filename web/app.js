@@ -319,10 +319,14 @@
 
     function logout() {
         if (!confirm('¿Cerrar sesión?')) return;
+        // Redirige a la home siempre: varias páginas (perfil, subir,
+        // calificar) muestran contenido que depende de la sesión, y solo
+        // limpiar el estado en memoria dejaba ese contenido "pegado" en
+        // pantalla hasta recargar. Un redirect fuerza el estado limpio en
+        // cualquier página.
         api('/auth/logout', { method: 'POST' }).catch(() => {}).then(() => {
             state.user = null;
-            refreshUserUI();
-            closeAll();
+            window.location.href = 'index.html';
         });
     }
 
@@ -1215,6 +1219,11 @@
                         <button class="btn-primary btn-admin-approve" data-id="${c.id}" data-action="approved">✓ Aceptar</button>
                         <button class="btn-secondary btn-danger-strong" data-id="${c.id}" data-action="rejected">✕ Rechazar</button>
                     `;
+                } else if (filter === 'rejected') {
+                    // La imagen ya se borró de R2 al rechazar -- no tiene
+                    // sentido "volver a pendiente", el creador tendría que
+                    // subir el Curis de nuevo.
+                    actions = `<p class="hint">Imagen borrada. Para republicarlo, el creador debe subirlo otra vez.</p>`;
                 } else {
                     actions = `<button class="btn-secondary" data-id="${c.id}" data-action="pending">↺ Volver a pendiente</button>`;
                 }
@@ -1241,6 +1250,8 @@
     }
 
     function setCurisStatus(id, status) {
+        // Rechazar borra la imagen de R2 y no se puede deshacer -- se avisa.
+        if (status === 'rejected' && !confirm('Rechazar este Curis borra su imagen definitivamente. ¿Seguro?')) return;
         api('/admin/curis/' + id + '/status', { method: 'POST', body: JSON.stringify({ status }) })
             .then(() => {
                 renderAdminQueue(currentAdminFilter);
