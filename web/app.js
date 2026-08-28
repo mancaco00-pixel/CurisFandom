@@ -93,6 +93,7 @@
                 state.user = {
                     id: res.user.id,
                     name: res.user.name,
+                    hasPassword: !!res.user.hasPassword,
                     registeredAt: res.user.registeredAt,
                     bio: extras.bio,
                     avatarData: extras.avatarData
@@ -168,6 +169,38 @@
 
     function isAuthenticated() { return !!state.user; }
     function isFullyRegistered() { return state.user && !!state.user.name; }
+    // El usuario ya eligió nombre pero todavía no definió su contraseña
+    // (login de Google + contraseña propia; la contraseña se crea una vez).
+    function needsPassword() { return isFullyRegistered() && !state.user.hasPassword; }
+
+    // Encadena los pasos de registro: primero el nombre, después la
+    // contraseña. Se llama al loguearse y al cargar cualquier página, por si
+    // el registro quedó a medias.
+    function promptRegistrationStep() {
+        if (!isAuthenticated()) return;
+        if (!isFullyRegistered()) { setTimeout(() => openModal('chooseNameModal'), 200); return; }
+        if (needsPassword()) setTimeout(() => openModal('choosePasswordModal'), 200);
+    }
+
+    function savePassword() {
+        const input = $('passwordInput');
+        if (!input) return;
+        const pw = input.value || '';
+        if (pw.length < 8 || pw.length > 20) {
+            alert('La contraseña debe tener entre 8 y 20 caracteres.');
+            input.focus();
+            return;
+        }
+        api('/auth/set-password', { method: 'POST', body: JSON.stringify({ password: pw }) })
+            .then(() => refreshAuthState())
+            .then(() => {
+                input.value = '';
+                refreshUserUI();
+                closeAll();
+                rerunPageInit(document.body.dataset.page);
+            })
+            .catch(err => alert('No se pudo guardar la contraseña: ' + err.message));
+    }
 
     function formatName(name) {
         if (!name) return '';
@@ -229,8 +262,8 @@
             .then(() => {
                 refreshUserUI();
                 closeAll();
-                if (!isFullyRegistered()) {
-                    setTimeout(() => openModal('chooseNameModal'), 200);
+                if (!isFullyRegistered() || needsPassword()) {
+                    promptRegistrationStep();
                 } else {
                     rerunPageInit(document.body.dataset.page);
                 }
@@ -294,7 +327,7 @@
             .then(() => {
                 refreshUserUI();
                 closeAll();
-                setTimeout(() => openModal('chooseNameModal'), 200);
+                promptRegistrationStep();
             })
             .catch(() => alert('No se pudo iniciar sesión. ¿Está corriendo el servidor?'));
     }
@@ -312,6 +345,7 @@
             .then(() => {
                 refreshUserUI();
                 closeAll();
+                if (needsPassword()) { promptRegistrationStep(); return; }
                 rerunPageInit(document.body.dataset.page);
             })
             .catch(err => alert('No se pudo guardar el nombre: ' + err.message));
@@ -1265,6 +1299,38 @@
             .catch(err => alert('No se pudo actualizar el estado: ' + err.message));
     }
 
+    function adminFlash(msg) {
+        const el = $('adminSaveStatus');
+        if (!el) return;
+        el.textContent = msg;
+        el.style.display = 'block';
+        setTimeout(() => { el.style.display = 'none'; }, 6000);
+    }
+
+    function purgeRejected() {
+        if (!confirm('¿Vaciar la lista de rechazados? Se borran definitivamente todos los Curis rechazados. No se puede deshacer.')) return;
+        api('/admin/purge-rejected', { method: 'POST' })
+            .then(res => {
+                renderAdminQueue(currentAdminFilter);
+                adminFlash('🗑️ Rechazados borrados: ' + (res.deleted || 0));
+            })
+            .catch(err => alert('No se pudo vaciar rechazados: ' + err.message));
+    }
+
+    function purgeAllCuris() {
+        // Tres advertencias antes de borrar todo, la última pide escribir.
+        if (!confirm('⚠️ ADVERTENCIA 1 de 3\n\nEsto borra TODOS los Curis: pendientes, aprobados y rechazados, con sus imágenes y todas sus calificaciones.\n\nLas cuentas de usuario NO se tocan.\n\n¿Continuar?')) return;
+        if (!confirm('⚠️ ADVERTENCIA 2 de 3\n\nLa acción NO se puede deshacer y no hay copia de seguridad. El ranking queda vacío.\n\n¿Continuar?')) return;
+        const typed = prompt('⚠️ ADVERTENCIA 3 de 3\n\nPara confirmar, escribí exactamente:  BORRAR TODO');
+        if (typed !== 'BORRAR TODO') { alert('Cancelado (el texto no coincide).'); return; }
+        api('/admin/purge-all-curis', { method: 'POST' })
+            .then(res => {
+                renderAdminQueue(currentAdminFilter);
+                adminFlash('💥 Todos los Curis borrados: ' + (res.deleted || 0));
+            })
+            .catch(err => alert('No se pudo borrar todo: ' + err.message));
+    }
+
     function bind() {
         const page = document.body.dataset.page;
 
@@ -1272,6 +1338,8 @@
         if ($('modalGoogleBtn')) $('modalGoogleBtn').addEventListener('click', signInWithGoogle);
         if ($('saveNameBtn')) $('saveNameBtn').addEventListener('click', saveUsername);
         if ($('usernameInput')) $('usernameInput').addEventListener('keypress', e => { if (e.key === 'Enter') saveUsername(); });
+        if ($('savePasswordBtn')) $('savePasswordBtn').addEventListener('click', savePassword);
+        if ($('passwordInput')) $('passwordInput').addEventListener('keypress', e => { if (e.key === 'Enter') savePassword(); });
         if ($('logoutBtn')) $('logoutBtn').addEventListener('click', logout);
         if ($('myAccountBtn')) $('myAccountBtn').addEventListener('click', openAccount);
         const av = $('userAvatar');
@@ -1330,6 +1398,8 @@
             if ($('adminLoginBtn')) $('adminLoginBtn').addEventListener('click', adminLogin);
             if ($('adminPasswordInput')) $('adminPasswordInput').addEventListener('keypress', e => { if (e.key === 'Enter') adminLogin(); });
             if ($('adminLogoutBtn')) $('adminLogoutBtn').addEventListener('click', adminLogout);
+            if ($('purgeRejectedBtn')) $('purgeRejectedBtn').addEventListener('click', purgeRejected);
+            if ($('purgeAllBtn')) $('purgeAllBtn').addEventListener('click', purgeAllCuris);
             document.querySelectorAll('.admin-tab').forEach(t => t.addEventListener('click', () => renderAdminQueue(t.dataset.status)));
         }
 
@@ -1355,8 +1425,8 @@
             refreshUserUI();
             setupRealGoogleButtons();
 
-            if (isAuthenticated() && !isFullyRegistered()) {
-                setTimeout(() => openModal('chooseNameModal'), 300);
+            if (isAuthenticated() && (!isFullyRegistered() || needsPassword())) {
+                promptRegistrationStep();
             }
 
             if (page === 'rate') initRatePage();

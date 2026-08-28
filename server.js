@@ -231,13 +231,24 @@ app.get('/api/auth/me', asyncRoute(async (req, res) => {
     if (!session) return res.json({ authenticated: false });
     const user = await db.getUserById(session.userId);
     if (!user) return res.json({ authenticated: false });
-    res.json({ authenticated: true, user: { id: user.id, name: user.name } });
+    res.json({ authenticated: true, user: { id: user.id, name: user.name, hasPassword: !!user.password_hash } });
 }));
 
 app.post('/api/auth/set-name', requireUser, asyncRoute(async (req, res) => {
     const name = (req.body.name || '').trim();
     if (!name) return res.status(400).json({ ok: false, error: 'Falta el nombre.' });
     await db.setUserName(req.userId, name);
+    res.json({ ok: true });
+}));
+
+// Contraseña propia del usuario (se pide una vez al registrarse, además del
+// login de Google). Validación mínima: 8 a 20 caracteres, sin más reglas.
+app.post('/api/auth/set-password', requireUser, asyncRoute(async (req, res) => {
+    const password = String(req.body.password || '');
+    if (password.length < 8 || password.length > 20) {
+        return res.status(400).json({ ok: false, error: 'La contraseña debe tener entre 8 y 20 caracteres.' });
+    }
+    await db.setUserPassword(req.userId, hashPassword(password));
     res.json({ ok: true });
 }));
 
@@ -375,6 +386,33 @@ app.post('/api/admin/curis/:id/status', requireAdmin, asyncRoute(async (req, res
         }
     }
     res.json({ ok: true });
+}));
+
+// Borrado masivo -- borra primero los objetos de R2 (best-effort: un fallo
+// suelto no aborta la operación) y después las filas de curis + sus ratings.
+async function purgeCuris(statuses) {
+    const rows = await db.listCurisForPurge(statuses);
+    await Promise.all(rows.map(r =>
+        storage.deleteFiles(r.image_file).catch(e => console.error('R2 delete fallo', r.id, e))
+    ));
+    return db.purgeCurisByIds(rows.map(r => r.id));
+}
+
+// "Vaciar rechazados": limpia la pestaña Rechazados del panel. Las imágenes
+// de esos Curis normalmente ya se borraron al rechazarlos; esto saca las
+// filas (y cubre cualquier imagen que haya quedado colgada de antes de que
+// el rechazo borrara en R2).
+app.post('/api/admin/purge-rejected', requireAdmin, asyncRoute(async (req, res) => {
+    const deleted = await purgeCuris(['rejected']);
+    res.json({ ok: true, deleted });
+}));
+
+// "Borrar TODOS los Curis": pendientes + aprobados + rechazados, sus
+// imágenes y sus calificaciones. NO toca las cuentas de usuario. El frontend
+// pide 3 confirmaciones antes de llamar acá.
+app.post('/api/admin/purge-all-curis', requireAdmin, asyncRoute(async (req, res) => {
+    const deleted = await purgeCuris(['pending', 'approved', 'rejected']);
+    res.json({ ok: true, deleted });
 }));
 
 app.listen(PORT, () => {

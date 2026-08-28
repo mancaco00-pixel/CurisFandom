@@ -12,11 +12,17 @@ dashboard de Supabase:
 ```sql
 ALTER TABLE curis ADD COLUMN IF NOT EXISTS music_track text;
 ALTER TABLE curis ADD COLUMN IF NOT EXISTS country text;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash text;
 ```
 
+La tercera línea (`users.password_hash`) es para la contraseña propia que
+el usuario define una vez al registrarse (además del login de Google). Sin
+esa columna, el paso de "creá tu contraseña" falla al guardar.
+
 No hace falta ninguna otra migración: el resto de los cambios (límite de
-estrellas, XP/rango, easter egg, botón de Patreon, y el paso a Cloudflare
-R2 para las imágenes) no tocan el esquema de la base de datos.
+estrellas, XP/rango, easter egg, botón de Patreon, el paso a Cloudflare R2
+para las imágenes, y los botones de borrado masivo del panel de admin) no
+tocan el esquema de la base de datos.
 
 ## 0b. Crear el bucket de Cloudflare R2 (imágenes y música)
 

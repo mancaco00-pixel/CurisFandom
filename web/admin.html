@@ -53,6 +53,15 @@
 
             <div class="admin-queue" id="adminQueue"></div>
             <p class="hint" id="adminEmpty" style="display:none; text-align:center; padding:2rem;">No hay Curis en esta categoría.</p>
+
+            <div class="admin-danger-zone">
+                <h3>⚠️ Zona peligrosa</h3>
+                <p class="hint">Estas acciones borran datos de forma permanente y no se pueden deshacer.</p>
+                <div class="admin-danger-actions">
+                    <button class="btn-secondary btn-danger-strong" id="purgeRejectedBtn">🗑️ Vaciar rechazados</button>
+                    <button class="btn-secondary btn-danger-strong" id="purgeAllBtn">💥 Borrar TODOS los Curis</button>
+                </div>
+            </div>
         </section>
     </main>
 

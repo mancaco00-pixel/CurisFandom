@@ -44,6 +44,17 @@ async function setUserName(id, name) {
     });
 }
 
+// Contraseña propia del usuario (además del login de Google) -- se define
+// una sola vez al registrarse. El hash lo arma server.js (scrypt), acá solo
+// se guarda. Requiere la columna users.password_hash (ver DEPLOY.md paso 0).
+async function setUserPassword(id, passwordHash) {
+    await request('/users' + qs({ id: `eq.${id}` }), {
+        method: 'PATCH',
+        headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ password_hash: passwordHash })
+    });
+}
+
 async function createCuris({ id, creatorId, creatorName, imageFile, color1, color2, musicTrack, country }) {
     await request('/curis', {
         method: 'POST',
@@ -124,6 +135,27 @@ async function setCurisImage(id, imageFile) {
     });
 }
 
+// ---- borrado masivo (panel de admin) ----
+
+// [{ id, image_file }] de los Curis que matchean los estados dados
+// (ej. ['rejected'] para "vaciar rechazados", los 3 para "borrar todo").
+async function listCurisForPurge(statuses) {
+    const filter = statuses.length === 1 ? `eq.${statuses[0]}` : `in.(${statuses.join(',')})`;
+    return request('/curis' + qs({ status: filter, select: 'id,image_file' }));
+}
+
+// Borra los ratings de esos Curis y después los Curis. No es atómico del
+// lado de la base (a diferencia de delete_curis_by_creator), pero el orden
+// ratings -> curis evita dejar una FK colgada. Las imágenes de R2 las borra
+// server.js antes de llamar acá.
+async function purgeCurisByIds(ids) {
+    if (!ids.length) return 0;
+    const inList = `in.(${ids.join(',')})`;
+    await request('/ratings' + qs({ curis_id: inList }), { method: 'DELETE', headers: { Prefer: 'return=minimal' } });
+    await request('/curis' + qs({ id: inList }), { method: 'DELETE', headers: { Prefer: 'return=minimal' } });
+    return ids.length;
+}
+
 async function getDailyStars(userId, date) {
     const rows = await request('/daily_stars' + qs({ user_id: `eq.${userId}`, date: `eq.${date}`, select: '*' }));
     return rows[0] || null;
@@ -190,7 +222,10 @@ module.exports = {
     upsertUser,
     getUserById,
     setUserName,
+    setUserPassword,
     createCuris,
+    listCurisForPurge,
+    purgeCurisByIds,
     getCurisById,
     listRatingPool,
     countApprovedExcluding,
