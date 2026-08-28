@@ -566,8 +566,13 @@
         $('rateCreator').textContent = (country ? country.flag + ' ' : '') + '@' + curis.creator;
         const img = $('curisImage');
         if (curis.imageFile) {
-            img.style.background = `url('${curis.imageFile}') center/cover no-repeat`;
+            // La imagen va en una variable CSS -- styles.css la muestra entera
+            // (contain) con relleno borroso alrededor, estilo TikTok, para que
+            // los Curis (que suelen ser viñetas con texto) no se recorten.
+            img.style.setProperty('--curis-src', `url('${curis.imageFile}')`);
+            img.style.background = '#07070f';
         } else {
+            img.style.removeProperty('--curis-src');
             img.style.background = `linear-gradient(135deg, ${curis.color1 || '#4a90e2'}, ${curis.color2 || '#357abd'})`;
         }
         const card = $('curisCard');

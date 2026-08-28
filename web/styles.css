@@ -1931,10 +1931,34 @@ select:focus {
     border-radius: 18px;
 }
 
+/* Imagen del Curis estilo TikTok: se ve ENTERA, nunca recortada
+   (background-size: contain). El espacio que sobra se rellena con una copia
+   borrosa y oscurecida de la misma imagen, como en TikTok/Instagram. La URL
+   llega por la variable --curis-src que setea app.js (loadCurisIntoStage). */
 .tiktok-card .curis-image {
     position: absolute;
     inset: 0;
     flex: none;
+    overflow: hidden;
+    background: #07070f;
+}
+.tiktok-card .curis-image::before,
+.tiktok-card .curis-image::after {
+    content: "";
+    position: absolute;
+    background-image: var(--curis-src);
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.tiktok-card .curis-image::before {   /* relleno borroso */
+    inset: -10%;
+    background-size: cover;
+    filter: blur(28px) brightness(0.5);
+    transform: scale(1.08);
+}
+.tiktok-card .curis-image::after {    /* el Curi completo, nítido, sin recortar */
+    inset: 0;
+    background-size: contain;
 }
 
 .tiktok-scrim {
