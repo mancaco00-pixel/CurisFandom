@@ -553,11 +553,9 @@ textarea:focus {
    formato fijo tipo TikTok. Así los memes con varias viñetas se ven
    completos y con su tamaño/calidad real, sin recortes. */
 .curis-card {
-    /* la tarjeta se ajusta al ancho del Curi (entre un mínimo cómodo para
-       los controles y un máximo), en vez de forzar un ancho fijo */
-    width: fit-content;
-    min-width: min(340px, 100%);
-    max-width: min(560px, 100%);
+    /* ancho fijo y cómodo para ver el Curi, sin importar su resolución:
+       los chicos se agrandan hasta acá, los grandes se achican. */
+    width: min(480px, 100%);
     border-radius: 12px;
     overflow: hidden;
     background: var(--bg-2);
@@ -578,13 +576,14 @@ textarea:focus {
 
 img.curis-image {
     display: block;
-    /* la imagen se escala a su proporción real dentro de estos topes:
-       nunca se recorta ni se deforma. Un Curi grande se achica para
-       entrar; uno chico app.js lo agranda un poco (fija un width en px). */
-    max-width: 100%;
-    max-height: 78vh;
-    width: auto;
+    /* siempre ocupa el ancho de la tarjeta (agranda los Curis chicos,
+       achica los grandes); el alto sale de la proporción real, con un
+       tope para los muy verticales. Nunca se recorta ni se deforma
+       (object-fit: contain cubre el caso raro del Curi altísimo). */
+    width: 100%;
     height: auto;
+    max-height: 82vh;
+    object-fit: contain;
 }
 
 .curis-image-wrap .music-toggle-btn {

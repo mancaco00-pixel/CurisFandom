@@ -564,22 +564,12 @@
 
         const country = findCountry(curis.country);
         $('rateCreator').textContent = (country ? country.flag + ' ' : '') + '@' + curis.creator;
-        // La imagen es un <img> real: la tarjeta toma la altura del Curi (no
-        // un formato fijo), así se ve completo y con su calidad. Si el Curi no
-        // tiene imagen, se muestra el degradado de color en el contenedor.
+        // La imagen es un <img> real: se muestra al ancho de la tarjeta
+        // (styles.css), completa y sin recortar, sin importar su resolución.
+        // Si el Curi no tiene imagen, va el degradado de color en el wrap.
         const img = $('curisImage');
         const wrap = $('curisImageWrap');
         if (curis.imageFile) {
-            img.style.width = '';
-            img.onload = () => {
-                // Los Curis grandes se achican solos por CSS (max-width/height).
-                // Los chicos quedarían minúsculos: se agrandan hasta ~1.7x
-                // (tope 480px) fijando un width. Sin recorte ni deformación.
-                const nw = img.naturalWidth;
-                img.style.width = (nw && nw < 480)
-                    ? Math.min(Math.round(nw * 1.7), 480) + 'px'
-                    : '';
-            };
             img.src = curis.imageFile;
             img.style.display = 'block';
             if (wrap) { wrap.style.background = ''; wrap.style.minHeight = ''; }
