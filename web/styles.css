@@ -549,11 +549,16 @@ textarea:focus {
     to { opacity: 0; transform: translateY(-45px) scale(0.97); }
 }
 
+/* La tarjeta se adapta a la imagen: la altura la manda el Curi, no un
+   formato fijo tipo TikTok. Así los memes con varias viñetas se ven
+   completos y con su tamaño/calidad real, sin recortes. */
 .curis-card {
-    width: 100%;
-    max-width: 420px;
-    aspect-ratio: 1 / 1;
-    border-radius: 8px;
+    /* la tarjeta se ajusta al ancho del Curi (entre un mínimo cómodo para
+       los controles y un máximo), en vez de forzar un ancho fijo */
+    width: fit-content;
+    min-width: min(340px, 100%);
+    max-width: min(560px, 100%);
+    border-radius: 12px;
     overflow: hidden;
     background: var(--bg-2);
     border: 1px solid var(--border);
@@ -562,12 +567,37 @@ textarea:focus {
     flex-direction: column;
 }
 
-.curis-image {
-    flex: 1;
-    background-size: cover;
-    background-position: center;
-    background-color: var(--bg-3);
+.curis-image-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-3);
+    min-height: 160px;
 }
+
+img.curis-image {
+    display: block;
+    /* la imagen se escala a su proporción real dentro de estos topes:
+       nunca se recorta ni se deforma. Un Curi grande se achica para
+       entrar; uno chico app.js lo agranda un poco (fija un width en px). */
+    max-width: 100%;
+    max-height: 78vh;
+    width: auto;
+    height: auto;
+}
+
+.curis-image-wrap .music-toggle-btn {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+}
+
+.curis-card > .curis-creator { padding: 0.9rem 1rem 0; text-align: center; border-top: none; background: none; }
+.curis-card > .rate-controls { margin-top: 0.7rem; background: none; border: none; padding-bottom: 0; }
+.curis-card > .rate-value { margin-top: 0.4rem; }
+.curis-card > .rate-actions { margin: 0.8rem 0 1rem; }
+.curis-card > .rate-feedback { margin: 0 1rem 1rem; }
 
 .curis-creator {
     padding: 0.7rem 1rem;
@@ -1908,119 +1938,9 @@ select:focus {
     .xp-toast { top: auto; bottom: 1.25rem; right: 1rem; }
 }
 
-/* ---------- feed tipo TikTok (calificar.html) ----------
-   Tarjeta vertical a pantalla completa (imagen de fondo, degradado abajo
-   para legibilidad, controles superpuestos) en vez de la tarjeta cuadrada
-   con los controles como bloques separados debajo -- pensado para que
-   consumir Curis se sienta como scrollear un feed, no llenar un
-   formulario. */
-
-.tiktok-stage {
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    min-height: 340px;
-}
-
-.tiktok-card {
-    width: 100%;
-    max-width: 420px;
-    aspect-ratio: auto;
-    height: min(74vh, 720px);
-    min-height: 420px;
-    border-radius: 18px;
-}
-
-/* Imagen del Curis estilo TikTok: se ve ENTERA, nunca recortada
-   (background-size: contain). El espacio que sobra se rellena con una copia
-   borrosa y oscurecida de la misma imagen, como en TikTok/Instagram. La URL
-   llega por la variable --curis-src que setea app.js (loadCurisIntoStage). */
-.tiktok-card .curis-image {
-    position: absolute;
-    inset: 0;
-    flex: none;
-    overflow: hidden;
-    background: #07070f;
-}
-.tiktok-card .curis-image::before,
-.tiktok-card .curis-image::after {
-    content: "";
-    position: absolute;
-    background-image: var(--curis-src);
-    background-repeat: no-repeat;
-    background-position: center;
-}
-.tiktok-card .curis-image::before {   /* relleno borroso */
-    inset: -10%;
-    background-size: cover;
-    filter: blur(28px) brightness(0.5);
-    transform: scale(1.08);
-}
-.tiktok-card .curis-image::after {    /* el Curi completo, nítido, sin recortar */
-    inset: 0;
-    background-size: contain;
-}
-
-.tiktok-scrim {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 62%;
-    background: linear-gradient(to top, rgba(8, 8, 20, 0.92) 0%, rgba(8, 8, 20, 0.55) 45%, rgba(8, 8, 20, 0) 100%);
-    pointer-events: none;
-}
-
-.tiktok-side-actions {
-    position: absolute;
-    right: 0.85rem;
-    top: 46%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.9rem;
-    z-index: 4;
-}
-
-.tiktok-bottom-info {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 0 1rem 1.1rem;
-    z-index: 3;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-}
-
-.tiktok-card .curis-creator {
-    padding: 0;
-    background: none;
-    border-top: none;
-    text-align: left;
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #fff;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.65);
-}
-
-.tiktok-card .rate-controls {
-    background: rgba(15, 15, 30, 0.55);
-    border-color: rgba(255, 255, 255, 0.16);
-}
-
-.tiktok-card .rate-value {
-    color: #fff;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.65);
-}
-
-.tiktok-card .rate-feedback {
-    background: rgba(15, 15, 30, 0.6);
-}
+/* ---------- calificar.html: tarjeta que se adapta a la imagen ---------- */
 
 @media (max-width: 640px) {
-    .tiktok-card { height: min(70vh, 640px); border-radius: 14px; }
-    .tiktok-side-actions { right: 0.6rem; }
+    .curis-card { border-radius: 10px; }
+    img.curis-image { max-height: 68vh; }
 }

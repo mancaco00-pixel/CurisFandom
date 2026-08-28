@@ -564,16 +564,32 @@
 
         const country = findCountry(curis.country);
         $('rateCreator').textContent = (country ? country.flag + ' ' : '') + '@' + curis.creator;
+        // La imagen es un <img> real: la tarjeta toma la altura del Curi (no
+        // un formato fijo), así se ve completo y con su calidad. Si el Curi no
+        // tiene imagen, se muestra el degradado de color en el contenedor.
         const img = $('curisImage');
+        const wrap = $('curisImageWrap');
         if (curis.imageFile) {
-            // La imagen va en una variable CSS -- styles.css la muestra entera
-            // (contain) con relleno borroso alrededor, estilo TikTok, para que
-            // los Curis (que suelen ser viñetas con texto) no se recorten.
-            img.style.setProperty('--curis-src', `url('${curis.imageFile}')`);
-            img.style.background = '#07070f';
+            img.style.width = '';
+            img.onload = () => {
+                // Los Curis grandes se achican solos por CSS (max-width/height).
+                // Los chicos quedarían minúsculos: se agrandan hasta ~1.7x
+                // (tope 480px) fijando un width. Sin recorte ni deformación.
+                const nw = img.naturalWidth;
+                img.style.width = (nw && nw < 480)
+                    ? Math.min(Math.round(nw * 1.7), 480) + 'px'
+                    : '';
+            };
+            img.src = curis.imageFile;
+            img.style.display = 'block';
+            if (wrap) { wrap.style.background = ''; wrap.style.minHeight = ''; }
         } else {
-            img.style.removeProperty('--curis-src');
-            img.style.background = `linear-gradient(135deg, ${curis.color1 || '#4a90e2'}, ${curis.color2 || '#357abd'})`;
+            img.removeAttribute('src');
+            img.style.display = 'none';
+            if (wrap) {
+                wrap.style.background = `linear-gradient(135deg, ${curis.color1 || '#4a90e2'}, ${curis.color2 || '#357abd'})`;
+                wrap.style.minHeight = '320px';
+            }
         }
         const card = $('curisCard');
         card.classList.remove('swap-out');

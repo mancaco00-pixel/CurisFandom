@@ -48,47 +48,43 @@
             <span class="ad-square-label"><span>Espacio publicitario</span><span class="ad-square-tag">300×80</span></span>
         </div>
 
-        <div class="tiktok-stage rate-stage" id="rateStage">
-            <div class="tiktok-card curis-card" id="curisCard">
-                <div class="curis-image" id="curisImage"></div>
-                <div class="tiktok-scrim"></div>
-
-                <div class="tiktok-side-actions">
+        <div class="rate-stage" id="rateStage">
+            <div class="curis-card" id="curisCard">
+                <div class="curis-image-wrap" id="curisImageWrap">
+                    <img class="curis-image" id="curisImage" alt="Curi">
                     <button class="music-toggle-btn" id="musicToggleBtn" style="display:none;" aria-label="Reproducir música">🎵</button>
                 </div>
 
-                <div class="tiktok-bottom-info">
-                    <div class="curis-creator" id="rateCreator">@Creador</div>
+                <div class="curis-creator" id="rateCreator">@Creador</div>
 
-                    <div class="rate-controls" id="rateControlsWrap">
-                        <button class="star-btn" id="starMinus" aria-label="Bajar">
-                            <span>−</span>
-                        </button>
+                <div class="rate-controls" id="rateControlsWrap">
+                    <button class="star-btn" id="starMinus" aria-label="Bajar">
+                        <span>−</span>
+                    </button>
 
-                        <div class="stars-display" id="starsDisplay">
-                            <span class="star-icon" data-pos="1">★</span>
-                            <span class="star-icon" data-pos="2">★</span>
-                            <span class="star-icon" data-pos="3">★</span>
-                            <span class="star-icon" data-pos="4">★</span>
-                            <span class="star-icon" data-pos="5">★</span>
-                        </div>
-
-                        <button class="star-btn" id="starPlus" aria-label="Subir">
-                            <span>+</span>
-                        </button>
+                    <div class="stars-display" id="starsDisplay">
+                        <span class="star-icon" data-pos="1">★</span>
+                        <span class="star-icon" data-pos="2">★</span>
+                        <span class="star-icon" data-pos="3">★</span>
+                        <span class="star-icon" data-pos="4">★</span>
+                        <span class="star-icon" data-pos="5">★</span>
                     </div>
 
-                    <div class="rate-value" id="rateValue">
-                        <span id="rateValueLabel">1.0</span>
-                    </div>
+                    <button class="star-btn" id="starPlus" aria-label="Subir">
+                        <span>+</span>
+                    </button>
+                </div>
 
-                    <div class="rate-actions" id="rateActions">
-                        <button class="btn-primary btn-confirm" id="confirmRate">Confirmar calificación</button>
-                    </div>
+                <div class="rate-value" id="rateValue">
+                    <span id="rateValueLabel">1.0</span>
+                </div>
 
-                    <div class="rate-feedback" id="rateFeedback" style="display:none;">
-                        <span id="rateFeedbackText"></span>
-                    </div>
+                <div class="rate-actions" id="rateActions">
+                    <button class="btn-primary btn-confirm" id="confirmRate">Confirmar calificación</button>
+                </div>
+
+                <div class="rate-feedback" id="rateFeedback" style="display:none;">
+                    <span id="rateFeedbackText"></span>
                 </div>
             </div>
         </div>
