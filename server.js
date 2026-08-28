@@ -16,7 +16,10 @@
  * resto (sesión, endpoints protegidos) no cambia.
  *
  * Uso: node server.js [puerto]   (por defecto 8934)
- * Variables de entorno: ADMIN_PASSWORD, SESSION_SECRET, GOOGLE_CLIENT_ID
+ * Variables de entorno: ADMIN_PASSWORD, SESSION_SECRET, GOOGLE_CLIENT_ID,
+ * SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (datos), y R2_ACCOUNT_ID /
+ * R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_BUCKET / R2_PUBLIC_BASE_URL
+ * (imágenes y música en Cloudflare R2). Ver DEPLOY.md.
  */
 
 const express = require('express');
@@ -355,7 +358,6 @@ app.post('/api/admin/curis/:id/status', requireAdmin, asyncRoute(async (req, res
     const c = await db.getCurisById(req.params.id);
     if (!c) return res.status(404).json({ ok: false, error: 'No encontrado.' });
     await db.setCurisStatus(c.id, status);
-    await storage.syncApprovedCopy(c.image_file, status === 'approved');
     res.json({ ok: true });
 }));
 

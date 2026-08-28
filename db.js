@@ -165,7 +165,7 @@ async function submitRating(userId, curisId, stars, today, capBase, capExtended)
 // Usado por "Eliminar cuenta": borra los Curis del usuario (y las
 // calificaciones que recibieron) de forma atómica del lado de la base vía
 // delete_curis_by_creator(), que además devuelve las filas borradas para
-// poder limpiar sus archivos en Supabase Storage desde acá.
+// poder limpiar sus archivos en Cloudflare R2 desde acá.
 async function deleteCurisByCreator(creatorId) {
     return request('/rpc/delete_curis_by_creator', {
         method: 'POST',

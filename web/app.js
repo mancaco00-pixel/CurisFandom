@@ -19,10 +19,9 @@
     // rangos que se arman con este XP acumulado.
     const RATING_XP = 10;
 
-    // Link real de Patreon -- todavía no existe la cuenta (2026-08-25), así
-    // que queda vacío a propósito. Apenas se cree, alcanza con pegar la URL
-    // acá; el botón de index.html empieza a funcionar solo.
-    const PATREON_URL = '';
+    // Link real de Patreon -- página "Curis Fandom" (verificada activa y
+    // pública el 2026-08-27). El botón de index.html abre esta URL.
+    const PATREON_URL = 'https://www.patreon.com/cw/CurisFandom355';
 
     // Config de negocio que vive en el servidor. Valores de arranque por
     // si /api/config todavía no respondió -- se reemplazan apenas carga
@@ -128,7 +127,15 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', quality));
+                    // WebP: ~25-35% menos peso que JPEG a calidad equivalente.
+                    // El servidor igual recomprime con sharp, pero esto ya
+                    // achica el payload del upload. Fallback a JPEG si el
+                    // navegador (muy viejo) no soporta encodear WebP.
+                    let out = canvas.toDataURL('image/webp', quality);
+                    if (out.indexOf('data:image/webp') !== 0) {
+                        out = canvas.toDataURL('image/jpeg', quality);
+                    }
+                    resolve(out);
                 };
                 img.src = e.target.result;
             };
@@ -862,7 +869,7 @@
             alert('La imagen es demasiado grande. Máximo 4 MB.');
             return;
         }
-        fileToCompressedDataURL(file, 1000, 0.82).then(dataUrl => {
+        fileToCompressedDataURL(file, 900, 0.80).then(dataUrl => {
             $('previewImg').src = dataUrl;
             $('previewImg').dataset.dataurl = dataUrl;
             $('uploadZone').style.display = 'none';
@@ -1239,7 +1246,7 @@
                 renderAdminQueue(currentAdminFilter);
                 const statusEl = $('adminSaveStatus');
                 if (status === 'approved' && statusEl) {
-                    statusEl.textContent = '✓ Sincronizado en Supabase Storage (aprobados/)';
+                    statusEl.textContent = '✓ Curis aprobado y publicado';
                     statusEl.style.display = 'block';
                     setTimeout(() => { statusEl.style.display = 'none'; }, 6000);
                 }
