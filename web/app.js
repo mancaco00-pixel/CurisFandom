@@ -31,7 +31,8 @@
         extraAdChance: 0.10,
         starsCapBase: 15,
         starsCapExtended: 40,
-        googleClientId: null
+        googleClientId: null,
+        devLogin: false
     };
 
     // state.user: null (sin sesión) o { id, name, registeredAt, bio, avatarData }.
@@ -154,7 +155,7 @@
         // hasta que el modal se abre, así que recién ahí tiene un ancho
         // real para renderizar el botón oficial de Google encima (ver
         // renderRealGoogleButton).
-        if (id === 'loginModal' && CONFIG.googleClientId) renderRealGoogleButton($('modalGoogleBtn'));
+        if (id === 'loginModal' && CONFIG.googleClientId && !CONFIG.devLogin) renderRealGoogleButton($('modalGoogleBtn'));
     }
     function closeAll() {
         document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
@@ -301,7 +302,7 @@
     }
 
     function setupRealGoogleButtons(attempt) {
-        if (!CONFIG.googleClientId) return;
+        if (!CONFIG.googleClientId || CONFIG.devLogin) return;
         if (!ensureGoogleInitialized(onGoogleCredential)) {
             if ((attempt || 0) < 25) setTimeout(() => setupRealGoogleButtons((attempt || 0) + 1), 200);
             return;
@@ -311,7 +312,11 @@
     }
 
     function signInWithGoogle() {
-        if (CONFIG.googleClientId) {
+        // Modo desarrollo local (CONFIG.devLogin): el botón de Google no
+        // funciona en localhost (origen no permitido), así que se entra con
+        // un usuario simulado. Igual pasa por una sesión real firmada por el
+        // servidor, no por datos inventados en el cliente.
+        if (CONFIG.googleClientId && !CONFIG.devLogin) {
             if (!ensureGoogleInitialized(onGoogleCredential)) {
                 alert('El login de Google todavía se está cargando, probá de nuevo en un segundo.');
                 return;
@@ -319,9 +324,6 @@
             window.google.accounts.id.prompt();
             return;
         }
-        // Modo desarrollo: todavía no hay GOOGLE_CLIENT_ID configurado en
-        // el servidor (ver handoff.md). Igual pasa por una sesión real
-        // firmada por el servidor, no por datos inventados en el cliente.
         api('/auth/dev-login', { method: 'POST' })
             .then(() => refreshAuthState())
             .then(() => {
@@ -353,13 +355,22 @@
 
     function logout() {
         if (!confirm('¿Cerrar sesión?')) return;
+        state.user = null;
+        // Cortar el auto-login de Google: sin esto, al volver a la home
+        // Google Identity Services vuelve a firmar la sesión en silencio
+        // (One Tap / FedCM) y parece que "no se cerró sesión".
+        try {
+            if (window.google && window.google.accounts && window.google.accounts.id) {
+                window.google.accounts.id.disableAutoSelect();
+            }
+        } catch (e) {}
         // Redirige a la home siempre: varias páginas (perfil, subir,
         // calificar) muestran contenido que depende de la sesión, y solo
         // limpiar el estado en memoria dejaba ese contenido "pegado" en
         // pantalla hasta recargar. Un redirect fuerza el estado limpio en
-        // cualquier página.
+        // cualquier página. Espera a que el servidor confirme el borrado de
+        // la cookie antes de navegar.
         api('/auth/logout', { method: 'POST' }).catch(() => {}).then(() => {
-            state.user = null;
             window.location.href = 'index.html';
         });
     }
@@ -496,6 +507,8 @@
     function initRatePage() {
         if (!requireAuth('Necesitas iniciar sesión para poder calificar Curis.')) return;
         setupDustEasterEgg();
+        document.addEventListener('pointerdown', primeCurisAudio, { once: true });
+        document.addEventListener('keydown', primeCurisAudio, { once: true });
         renderRate();
     }
 
@@ -527,6 +540,9 @@
         if (value) value.style.display = 'none';
         if (actions) actions.style.display = 'none';
         if (feedback) feedback.style.display = 'none';
+        fadeOutCurisAudio();
+        const mBtn = $('musicToggleBtn');
+        if (mBtn) mBtn.style.display = 'none';
 
         let finished = $('rateFinished');
         if (!finished) {
@@ -570,12 +586,22 @@
         const img = $('curisImage');
         const wrap = $('curisImageWrap');
         if (curis.imageFile) {
+            // Tope de agrandado: un Curi de baja resolución no se estira a
+            // más de 1.8x su ancho real (si no queda todo borroso). Los
+            // grandes igual los achica el CSS (max-width:100%).
+            img.style.width = '';
+            img.onload = () => {
+                const maxW = (wrap ? wrap.clientWidth : 480) || 480;
+                img.style.width = Math.min(maxW, Math.round(img.naturalWidth * 1.8)) + 'px';
+            };
             img.src = curis.imageFile;
             img.style.display = 'block';
             if (wrap) { wrap.style.background = ''; wrap.style.minHeight = ''; }
         } else {
+            img.onload = null;
             img.removeAttribute('src');
             img.style.display = 'none';
+            img.style.width = '';
             if (wrap) {
                 wrap.style.background = `linear-gradient(135deg, ${curis.color1 || '#4a90e2'}, ${curis.color2 || '#357abd'})`;
                 wrap.style.minHeight = '320px';
@@ -596,29 +622,113 @@
     }
 
     // --- música de fondo del Curis que se está calificando ---
+    // La música se escucha suave (volumen bajo) y nunca entra de golpe:
+    // aparece con un fundido de ~1.2s y, al pasar al siguiente Curis, se
+    // va con otro fundido antes de que arranque la próxima canción.
+    const MUSIC_VOLUME = 0.35;
+    let audioFadeTimer = null;
+    let audioPrimed = false; // ¿el usuario ya tocó la página? (autoplay)
+
+    function fadeAudio(audio, to, ms, done) {
+        if (audioFadeTimer) { clearInterval(audioFadeTimer); audioFadeTimer = null; }
+        const from = audio.volume;
+        const steps = Math.max(1, Math.round(ms / 50));
+        let i = 0;
+        audioFadeTimer = setInterval(() => {
+            i++;
+            audio.volume = Math.max(0, Math.min(1, from + (to - from) * (i / steps)));
+            if (i >= steps) {
+                clearInterval(audioFadeTimer);
+                audioFadeTimer = null;
+                if (done) done();
+            }
+        }, 50);
+    }
+
+    // Fundido de salida + pausa. Se llama justo antes de pasar al siguiente
+    // Curis, así la transición entre canciones no es abrupta.
+    function fadeOutCurisAudio(done) {
+        const audio = $('curisAudio');
+        if (!audio || audio.paused || !audio.currentSrc) { if (done) done(); return; }
+        fadeAudio(audio, 0, 650, () => { audio.pause(); if (done) done(); });
+    }
+
     function setupCurisAudio(curis) {
         const audio = $('curisAudio');
         const btn = $('musicToggleBtn');
         if (!audio || !btn) return;
+        if (audioFadeTimer) { clearInterval(audioFadeTimer); audioFadeTimer = null; }
         audio.pause();
+        audio.ontimeupdate = null;
         const track = findMusicTrack(curis.musicTrack);
         if (!track) {
             btn.style.display = 'none';
+            btn.classList.remove('playing');
             audio.removeAttribute('src');
             return;
         }
-        audio.src = track.src;
         btn.style.display = 'flex';
         btn.classList.remove('playing');
+        if (audio.currentSrc !== track.src) audio.src = track.src;
+
+        // Salta al segundo elegido por quien subió el Curi. Se intenta ya, y
+        // otra vez cuando haya metadata / cuando el loop vuelva al principio.
+        const seekToStart = () => {
+            if (!track.start) return;
+            if (audio.currentTime < track.start - 0.4) {
+                try { audio.currentTime = track.start; } catch (e) {}
+            }
+        };
+        audio.ontimeupdate = track.start ? () => { if (!audio.seeking) seekToStart(); } : null;
+
+        // IMPORTANTE: audio.play() tiene que llamarse de forma síncrona
+        // dentro del gesto del usuario (si se difiere a un evento tipo
+        // loadedmetadata, el navegador ya considera consumido el gesto y
+        // bloquea la reproducción). Por eso se llama directo y el seek va
+        // después.
+        const play = () => {
+            audio.volume = 0;
+            const p = audio.play();
+            if (p && p.then) {
+                p.then(() => {
+                    btn.classList.add('playing');
+                    seekToStart();
+                    if (audio.readyState < 1) audio.addEventListener('loadedmetadata', seekToStart, { once: true });
+                    fadeAudio(audio, MUSIC_VOLUME, 1200);
+                }).catch(() => { btn.classList.remove('playing'); });
+            }
+        };
+
         btn.onclick = () => {
+            audioPrimed = true;
             if (audio.paused) {
-                audio.play().catch(() => {});
-                btn.classList.add('playing');
+                play();
             } else {
-                audio.pause();
+                fadeAudio(audio, 0, 350, () => audio.pause());
                 btn.classList.remove('playing');
             }
         };
+
+        // La música arranca en cuanto se ve el Curi (no cuando se califica).
+        // Se intenta siempre acá, apenas se carga el Curi en pantalla. Para
+        // el 1er Curi el navegador puede bloquear el autoplay (todavía no
+        // hubo ningún gesto en la página) -> queda el botón 🎵 y
+        // primeCurisAudio() lo dispara en el primer toque en cualquier lado.
+        // Del 2º Curi en adelante ya arranca solo con su fundido.
+        play();
+    }
+
+    // Arranca la música en la primera interacción del usuario con la página
+    // de calificar (por la política de autoplay de los navegadores). Tiene
+    // que correr de forma síncrona en el handler del gesto.
+    function primeCurisAudio() {
+        if (audioPrimed) return;
+        audioPrimed = true;
+        const audio = $('curisAudio');
+        const btn = $('musicToggleBtn');
+        if (audio && btn && btn.style.display !== 'none' && audio.paused && audio.getAttribute('src')) {
+            btn.click();
+        }
     }
 
     // --- easter egg: 4 clics seguidos en el nombre del Curis que está al
@@ -724,6 +834,7 @@
                 setTimeout(() => {
                     const card = $('curisCard');
                     card.classList.add('swap-out');
+                    fadeOutCurisAudio();
                     setTimeout(() => { renderRate(); }, 480);
                 }, 1200);
             })
@@ -847,9 +958,15 @@
 
     // Librería de música (window.MUSIC_LIBRARY, ver music-library.js) --
     // busca por id, no por src, así que renombrar un archivo no rompe nada.
-    function findMusicTrack(id) {
-        if (!id || !window.MUSIC_LIBRARY) return null;
-        return window.MUSIC_LIBRARY.find(t => t.id === id) || null;
+    // El valor guardado por Curis puede traer un "@<segundo>" de arranque
+    // (p.ej. "judas@37"); se devuelve como track.start (número, 0 si no hay).
+    function findMusicTrack(value) {
+        if (!value || !window.MUSIC_LIBRARY) return null;
+        const at = String(value).indexOf('@');
+        const id = at === -1 ? value : value.slice(0, at);
+        const start = at === -1 ? 0 : (parseInt(value.slice(at + 1), 10) || 0);
+        const track = window.MUSIC_LIBRARY.find(t => t.id === id);
+        return track ? Object.assign({}, track, { start: Math.max(0, start) }) : null;
     }
 
     // País de origen del Curis (de dónde viene / quién lo sube) -- lista
@@ -897,7 +1014,71 @@
         if (!requireAuth('Necesitas iniciar sesión para subir tu Curis.')) return;
         $('uploadAs').textContent = state.user.name;
         populateMusicSelect();
+        initMusicTrim();
         resetUploadView();
+    }
+
+    // Mini reproductor de subir.html: al elegir una canción, el creador
+    // puede escucharla y marcar desde qué segundo quiere que arranque
+    // cuando alguien califique su Curi. Se guarda solo ese número (#musicStart).
+    function initMusicTrim() {
+        const select = $('musicSelect');
+        const trim = $('musicTrim');
+        const range = $('musicTrimRange');
+        const timeLabel = $('musicTrimTime');
+        const startHidden = $('musicStart');
+        const playBtn = $('musicTrimPlay');
+        const hintStrong = $('musicTrimHint') ? $('musicTrimHint').querySelector('strong') : null;
+        const audio = $('musicPreviewAudio');
+        if (!select || !trim || !audio || trim.dataset.bound) return;
+        trim.dataset.bound = '1';
+
+        const fmt = (s) => {
+            s = Math.max(0, Math.round(s));
+            return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+        };
+        const syncFromRange = () => {
+            const dur = audio.duration || 0;
+            const sec = dur ? (range.value / 1000) * dur : 0;
+            startHidden.value = Math.round(sec);
+            timeLabel.textContent = fmt(sec);
+            if (hintStrong) hintStrong.textContent = fmt(sec);
+        };
+
+        select.addEventListener('change', () => {
+            audio.pause();
+            playBtn.textContent = '▶';
+            const track = findMusicTrack(select.value);
+            if (!track) { trim.style.display = 'none'; audio.removeAttribute('src'); return; }
+            trim.style.display = 'block';
+            range.value = 0;
+            startHidden.value = 0;
+            timeLabel.textContent = '0:00';
+            if (hintStrong) hintStrong.textContent = '0:00';
+            range.disabled = true;
+            audio.src = track.src;
+            audio.load();
+        });
+
+        audio.addEventListener('loadedmetadata', () => { range.disabled = false; syncFromRange(); });
+        audio.addEventListener('error', () => {
+            timeLabel.textContent = '—';
+            alert('No se pudo cargar esta canción para escucharla. Igual se puede publicar el Curi con ella; probá recargar la página si querés previsualizarla.');
+        });
+        range.addEventListener('input', () => {
+            syncFromRange();
+            if (!audio.paused) { try { audio.currentTime = +startHidden.value; } catch (e) {} }
+        });
+        playBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                try { audio.currentTime = +startHidden.value || 0; } catch (e) {}
+                audio.play().then(() => { playBtn.textContent = '⏸'; }).catch(() => {});
+            } else {
+                audio.pause();
+                playBtn.textContent = '▶';
+            }
+        });
+        audio.addEventListener('ended', () => { playBtn.textContent = '▶'; });
     }
 
     function resetUploadView() {
@@ -962,7 +1143,11 @@
         const dataUrl = img ? img.dataset.dataurl : null;
         if (!dataUrl) return;
         const musicSelect = $('musicSelect');
-        const musicTrack = musicSelect ? musicSelect.value : '';
+        let musicTrack = musicSelect ? musicSelect.value : '';
+        // punto de arranque elegido en el mini reproductor (segundos)
+        const startInput = $('musicStart');
+        const startSec = musicTrack && startInput ? Math.max(0, Math.round(+startInput.value || 0)) : 0;
+        if (musicTrack && startSec > 0) musicTrack += '@' + startSec;
         const countrySelect = $('countrySelect');
         const country = countrySelect ? countrySelect.value : '';
         api('/curis', { method: 'POST', body: JSON.stringify({ imageData: dataUrl, musicTrack, country }) })

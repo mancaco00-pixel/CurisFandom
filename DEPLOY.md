@@ -44,10 +44,15 @@ servidor no arranca.
      una sola vez)
 4. Guardar las 5 en `.env.production.local` para local y cargarlas en
    Render (paso 3, están en `render.yaml` con `sync: false`).
-5. **Música**: subir los `.mp3` a mano al bucket, dentro de la carpeta
-   `music/`, y agregar una línea en `web/music-library.js` con la URL
-   pública completa (`R2_PUBLIC_BASE_URL/music/archivo.mp3`). Instrucciones
-   en el comentario de ese archivo.
+5. **Música**: subir los `.mp3` a mano al bucket, **directo dentro de la
+   carpeta `music/`** (no crear subcarpetas), con nombres limpios sin
+   espacios ni acentos (`mi-cancion.mp3`), y agregar una línea en
+   `web/music-library.js` con la URL pública completa
+   (`R2_PUBLIC_BASE_URL/music/mi-cancion.mp3`). Instrucciones en el
+   comentario de ese archivo. El punto de arranque de la canción (el
+   segundo desde el que suena en calificar) lo elige quien sube el Curi y
+   se guarda dentro de `music_track` como `id@segundos` — no necesita
+   columna nueva.
 
 > Las imágenes que hubiera de pruebas viejas en Supabase Storage quedan
 > huérfanas (el sitio ya no las mira). Si la tabla `curis` tiene solo
@@ -102,7 +107,10 @@ URL que te den ahí en el `git remote add`.)
 ## 3. Conectar esa URL a Google Cloud Console
 
 El Client ID de Google solo acepta pedidos de login desde los orígenes
-que tenga autorizados (hoy solo `http://localhost:8934`):
+que tenga autorizados (hoy solo `http://localhost:8934`). En **local no
+hace falta Google**: `npm run dev` setea `ALLOW_DEV_LOGIN=1` y el botón de
+"Iniciar sesión" entra con un usuario de prueba (misma sesión firmada por
+el servidor). En **producción** hay que autorizar el origen de Render:
 
 1. [Google Cloud Console](https://console.cloud.google.com/) → el
    proyecto ya creado → "APIs y servicios" → "Credenciales" → el Client

@@ -47,6 +47,15 @@ if (!GOOGLE_CLIENT_ID) {
 }
 const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
 
+// Login de desarrollo simulado. Siempre disponible si no hay GOOGLE_CLIENT_ID.
+// Si SÍ lo hay (prod), queda deshabilitado salvo que ALLOW_DEV_LOGIN=1, que
+// solo lo setea dev.js al correr `npm run dev` -- Render corre `npm start`
+// (server.js directo) y nunca lo tiene, así que en producción no existe.
+const ALLOW_DEV_LOGIN = !GOOGLE_CLIENT_ID || process.env.ALLOW_DEV_LOGIN === '1';
+if (GOOGLE_CLIENT_ID && ALLOW_DEV_LOGIN) {
+    console.warn('⚠ ALLOW_DEV_LOGIN=1: el login simulado (POST /api/auth/dev-login) está habilitado ADEMÁS del de Google. Solo para desarrollo local.');
+}
+
 const CONFIG = {
     adSeconds: 30,
     extraAdChance: 0.10,
@@ -55,7 +64,10 @@ const CONFIG = {
     // 15) antes de tener que ver el anuncio de 30s que sube el cap a 40.
     starsCapBase: 15,
     starsCapExtended: 40,
-    googleClientId: GOOGLE_CLIENT_ID
+    googleClientId: GOOGLE_CLIENT_ID,
+    // true -> el frontend usa el login simulado (desarrollo local) en vez
+    // del botón de Google, que no funciona en localhost (origen no permitido).
+    devLogin: ALLOW_DEV_LOGIN
 };
 
 const CURIS_COLORS = [['#ff3d7f', '#ff7a18'], ['#6c5ce7', '#a29bfe'], ['#00d4ff', '#6c5ce7'], ['#00b894', '#00d4ff'], ['#fdcb6e', '#e17055']];
@@ -190,7 +202,7 @@ app.get('/api/config', (req, res) => res.json(CONFIG));
 // probando todo el resto del sitio sin depender de tener credenciales de
 // Google a mano.
 app.post('/api/auth/dev-login', asyncRoute(async (req, res) => {
-    if (GOOGLE_CLIENT_ID) return res.status(404).json({ ok: false, error: 'Login de desarrollo deshabilitado: ya hay login de Google real configurado.' });
+    if (!ALLOW_DEV_LOGIN) return res.status(404).json({ ok: false, error: 'Login de desarrollo deshabilitado: ya hay login de Google real configurado.' });
     const userId = 'dev_' + crypto.randomBytes(8).toString('hex');
     await db.upsertUser(userId, null);
     setCookie(res, 'user_session', signSession({ userId }, USER_SESSION_TTL_MS), USER_SESSION_TTL_MS / 1000);
@@ -259,12 +271,13 @@ app.post('/api/curis', requireUser, asyncRoute(async (req, res) => {
     const imageData = req.body.imageData;
     if (!user || !user.name || !imageData) return res.status(400).json({ ok: false, error: 'Datos inválidos.' });
 
-    // musicTrack es solo el "id" de una canción de web/music-library.js, no
-    // una URL ni un archivo -- el frontend resuelve ese id a un src real al
-    // reproducir. Acá solo se valida forma (evitar basura), nunca se
-    // interpreta como ruta de archivo.
+    // musicTrack es el "id" de una canción de web/music-library.js, no una
+    // URL ni un archivo, con un "@<segundo>" opcional al final (el punto de
+    // arranque que eligió quien sube el Curi, p.ej. "judas@37"). El frontend
+    // resuelve ese id a un src real al reproducir. Acá solo se valida forma
+    // (evitar basura), nunca se interpreta como ruta de archivo.
     let musicTrack = req.body.musicTrack;
-    if (typeof musicTrack !== 'string' || !/^[a-z0-9-]{1,60}$/.test(musicTrack)) musicTrack = null;
+    if (typeof musicTrack !== 'string' || !/^[a-z0-9-]{1,60}(@\d{1,4})?$/.test(musicTrack)) musicTrack = null;
 
     // country: de dónde viene el Curis / quién lo sube -- opcional, se
     // valida contra la whitelist de LATAM_COUNTRIES, nunca se guarda texto libre.

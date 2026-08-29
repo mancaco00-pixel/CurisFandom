@@ -110,6 +110,18 @@
                         <option value="">Sin música</option>
                     </select>
                     <p class="hint" id="musicEmptyHint" style="display:none;">Todavía no hay canciones cargadas — ¡pronto vamos a ir sumando!</p>
+
+                    <div class="music-trim" id="musicTrim" style="display:none;">
+                        <span class="music-trim-label">✂️ Elegí desde qué parte suena</span>
+                        <div class="music-trim-row">
+                            <button type="button" class="music-trim-play" id="musicTrimPlay" aria-label="Escuchar">▶</button>
+                            <input type="range" id="musicTrimRange" min="0" max="1000" value="0" step="1" aria-label="Desde qué parte suena">
+                            <span class="music-trim-time" id="musicTrimTime">0:00</span>
+                        </div>
+                        <p class="hint" id="musicTrimHint">Escuchá la canción y arrastrá la barra hasta la parte que querés que suene mientras califican tu Curi. Empieza en <strong>0:00</strong>.</p>
+                        <input type="hidden" id="musicStart" value="0">
+                    </div>
+                    <audio id="musicPreviewAudio" preload="none"></audio>
                 </div>
 
                 <button class="btn-primary" id="publishBtn">Publicar Curis</button>

@@ -15,6 +15,10 @@
  *
  * Las variables ya presentes en el entorno tienen prioridad, así que
  * `PORT=9000 npm run dev` sigue funcionando.
+ *
+ * Además habilita el login simulado (ALLOW_DEV_LOGIN=1): el botón de Google
+ * no funciona en localhost (Google rechaza el origen), así que en local se
+ * entra con un usuario de prueba. En producción esto nunca se setea.
  */
 
 const fs = require('fs');
@@ -67,5 +71,7 @@ if (missing.length) {
     console.error('  Completalas en .env.production.local y volvé a correr "npm run dev".\n');
     process.exit(1);
 }
+
+if (process.env.ALLOW_DEV_LOGIN === undefined) process.env.ALLOW_DEV_LOGIN = '1';
 
 require('./server.js');
