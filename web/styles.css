@@ -2008,3 +2008,134 @@ select:focus {
     .curis-card { border-radius: 10px; }
     img.curis-image { max-height: 68vh; }
 }
+
+/* ---------- páginas de contenido (cómo funciona, guía, FAQ, novedades) ---------- */
+
+.content-nav {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.content-nav a {
+    padding: 0.4rem 0.85rem;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    text-decoration: none;
+    color: var(--text-muted);
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.content-nav a:hover { border-color: var(--primary); color: var(--text); }
+.content-nav a[aria-current="page"] { border-color: var(--primary); color: var(--text); background: var(--bg-2); }
+
+.legal-content .content-lead {
+    font-size: 1rem;
+    color: var(--text);
+    line-height: 1.65;
+    margin-bottom: 1.5rem;
+}
+
+.legal-content h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 1.25rem 0 0.5rem;
+}
+
+.legal-content ol {
+    margin: 0 0 0.85rem 1.25rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    font-size: 0.92rem;
+}
+
+.legal-content ol li { margin-bottom: 0.4rem; }
+
+.faq-item { border-bottom: 1px solid var(--border); padding: 0.9rem 0; }
+.faq-item:last-child { border-bottom: 0; }
+.faq-item h3 { margin: 0 0 0.4rem; }
+.faq-item p { margin-bottom: 0; }
+
+.changelog-entry { margin-bottom: 1.5rem; }
+.changelog-date {
+    font-size: 0.8rem;
+    color: var(--primary);
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+.changelog-entry h3 { margin: 0.2rem 0 0.5rem; }
+
+/* ---------- galeria.html ---------- */
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.gallery-item {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.gallery-item-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    background: var(--bg-3);
+    display: block;
+}
+
+.gallery-item-body { padding: 0.7rem 0.85rem; display: flex; flex-direction: column; gap: 0.2rem; }
+.gallery-item-creator { font-weight: 600; font-size: 0.88rem; color: var(--text); }
+.gallery-item-meta { font-size: 0.8rem; color: var(--text-muted); }
+
+.gallery-empty, .gallery-loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* bloque de texto introductorio en la home */
+.home-about {
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: left;
+    color: var(--text-muted);
+    line-height: 1.65;
+    font-size: 0.92rem;
+}
+.home-about h2 {
+    text-align: center;
+    color: var(--text);
+    font-size: 1.15rem;
+    margin-bottom: 0.85rem;
+}
+.home-about p { margin-bottom: 0.8rem; }
+.home-about-links {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1.25rem;
+}
+.home-about-links a {
+    padding: 0.45rem 0.95rem;
+    background: var(--bg-3);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.83rem;
+    text-decoration: none;
+    color: var(--text-muted);
+}
+.home-about-links a:hover { border-color: var(--primary); color: var(--text); }
