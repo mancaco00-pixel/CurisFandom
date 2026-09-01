@@ -1,0 +1,1695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Calcador de portadas — CurisFandom</title>
+<meta name="description" content="Herramienta gratis para calcar poses y referencias y dibujar portadas originales (9:16, 4:5, 1:1, 16:9 y a medida). Sin cuenta, sin instalar: todo pasa en tu navegador.">
+<meta name="theme-color" content="#0d0f13">
+<meta name="google-adsense-account" content="ca-pub-3413374034507030">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3413374034507030" crossorigin="anonymous"></script>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Calcador de portadas — CurisFandom">
+<meta property="og:description" content="Calcá poses y referencias y dibujá portadas originales en el navegador. Gratis, sin cuenta.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230d0f13'/%3E%3Cpath d='M25 72 L60 24 a10 10 0 0 1 16 12 L41 84 L20 90 Z' fill='none' stroke='%235b8cff' stroke-width='7' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg-0:#0d0f13;
+    --bg-1:#151922;
+    --bg-2:#1e2430;
+    --bg-3:#2a323f;
+    --line:#333c4a;
+    --text:#e6e9ef;
+    --text-dim:#8a93a3;
+    --accent:#5b8cff;
+    --accent-soft:#2d3d63;
+    --danger:#ff5b6b;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  html,body{height:100%}
+
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg-0);
+    color:var(--text);
+    display:flex;
+    overflow:hidden;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+
+  /* ---------- Panel de controles ---------- */
+  #panel{
+    width:280px;
+    flex:0 0 280px;
+    height:100%;
+    background:var(--bg-1);
+    border-right:1px solid var(--line);
+    padding:18px 16px;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+
+  #panel h1{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.3px;
+  }
+  #panel h1 span{
+    display:block;
+    font-size:11px;
+    font-weight:400;
+    color:var(--text-dim);
+    margin-top:2px;
+  }
+
+  .group{
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+  }
+  .group > .label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.7px;
+    color:var(--text-dim);
+  }
+
+  button, .btn{
+    appearance:none;
+    border:1px solid var(--line);
+    background:var(--bg-2);
+    color:var(--text);
+    padding:9px 11px;
+    border-radius:9px;
+    font-size:13px;
+    cursor:pointer;
+    text-align:left;
+    transition:background .12s, border-color .12s, transform .05s;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:100%;
+  }
+  button:hover, .btn:hover{background:var(--bg-3)}
+  button:active{transform:translateY(1px)}
+  button.active{
+    border-color:var(--accent);
+    background:var(--accent-soft);
+    color:#fff;
+  }
+  button.danger{color:var(--danger);border-color:#4a2b30}
+  button.danger:hover{background:#3a2226}
+  button:disabled{opacity:.4;cursor:not-allowed}
+
+  .row{display:flex;gap:8px}
+  .row button{flex:1;justify-content:center;text-align:center}
+
+  select, input[type=number]{
+    appearance:none;
+    width:100%;
+    border:1px solid var(--line);
+    background:var(--bg-2);
+    color:var(--text);
+    padding:9px 10px;
+    border-radius:9px;
+    font-size:13px;
+    font-family:inherit;
+  }
+  #customFormat{display:flex;align-items:center;gap:6px}
+  #customFormat[hidden]{display:none}
+  #customFormat input{width:72px;text-align:center}
+  #customFormat span{color:var(--text-dim);font-size:13px}
+  #customFormat button{width:auto;flex:1;justify-content:center;text-align:center}
+
+  /* Sliders */
+  input[type=range]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height:5px;
+    border-radius:4px;
+    background:var(--bg-3);
+    outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    appearance:none;
+    width:17px;height:17px;
+    border-radius:50%;
+    background:var(--accent);
+    cursor:pointer;
+    border:2px solid #0d0f13;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:15px;height:15px;
+    border-radius:50%;
+    background:var(--accent);
+    cursor:pointer;
+    border:2px solid #0d0f13;
+  }
+  input[type=range]:disabled{opacity:.4}
+
+  .slider-head{
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    color:var(--text-dim);
+  }
+  .slider-head b{color:var(--text);font-weight:600}
+  .slider-head .label{text-transform:none;letter-spacing:0}
+
+  /* Color picker */
+  .color-wrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  input[type=color]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:42px;height:42px;
+    border:none;
+    border-radius:10px;
+    background:none;
+    cursor:pointer;
+  }
+  input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+  input[type=color]::-webkit-color-swatch{border:1px solid var(--line);border-radius:10px}
+  input[type=color]::-moz-color-swatch{border:1px solid var(--line);border-radius:10px}
+
+  .swatches{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:6px;
+  }
+  .swatches button{
+    padding:0;
+    width:100%;
+    aspect-ratio:1;
+    border-radius:7px;
+    border:1px solid var(--line);
+  }
+  .swatches button.active{outline:2px solid var(--accent);outline-offset:1px}
+
+  .hint{
+    font-size:11px;
+    color:var(--text-dim);
+    line-height:1.5;
+  }
+  kbd{
+    background:var(--bg-3);
+    border:1px solid var(--line);
+    border-bottom-width:2px;
+    border-radius:5px;
+    padding:1px 6px;
+    font-size:11px;
+    font-family:inherit;
+  }
+
+  /* ---------- Zona del lienzo ---------- */
+  #stage{
+    flex:1;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    overflow:hidden;
+    background:
+      linear-gradient(45deg,#0a0c10 25%,transparent 25%,transparent 75%,#0a0c10 75%),
+      linear-gradient(45deg,#0a0c10 25%,#101318 25%,#101318 75%,#0a0c10 75%);
+    background-size:28px 28px;
+    background-position:0 0,14px 14px;
+  }
+
+  #frame{
+    position:relative;
+    box-shadow:0 12px 45px rgba(0,0,0,.55);
+    border-radius:2px;
+    transform-origin:center center;
+    /* width / height los fija el JS (fitFrame) según el formato;
+       transform lo fija applyView() para el zoom de la vista */
+  }
+
+  /* checkerboard para representar "transparente" */
+  #frame.bg-transparent{
+    background:
+      linear-gradient(45deg,#c9c9c9 25%,transparent 25%,transparent 75%,#c9c9c9 75%),
+      linear-gradient(45deg,#c9c9c9 25%,#f2f2f2 25%,#f2f2f2 75%,#c9c9c9 75%);
+    background-color:#f2f2f2;
+    background-size:26px 26px;
+    background-position:0 0,13px 13px;
+  }
+  #frame.bg-white{background:#ffffff}
+  #frame.bg-black{background:#000000}
+
+  #frame canvas, #frame img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  #frame img[hidden]{display:none}
+  #refImg{
+    object-fit:cover;
+    transform-origin:center center;
+    transition:opacity .12s ease;
+    will-change:transform;
+    pointer-events:none;
+    z-index:0;
+  }
+  #frame.ref-on-top #refImg{z-index:2}
+  #frame.refedit #refImg{
+    outline:2px dashed var(--accent);
+    outline-offset:-2px;
+  }
+
+  #drawCanvas{
+    touch-action:none;
+    cursor:crosshair;
+    z-index:1;
+  }
+  #frame.refedit #drawCanvas{cursor:grab}
+  #frame.grabbing #drawCanvas{cursor:grabbing}
+
+  /* Botón flotante para ocultar/mostrar referencia (queda a mano en móvil) */
+  #peekBtn{
+    position:absolute;
+    top:10px;right:10px;
+    width:auto;
+    padding:7px 10px;
+    font-size:12px;
+    background:rgba(20,24,34,.82);
+    backdrop-filter:blur(3px);
+    border-radius:8px;
+    z-index:5;
+  }
+  #peekBtn[hidden]{display:none}
+
+  @media (max-width:720px){
+    body{flex-direction:column}
+    #panel{
+      width:100%;
+      flex:0 0 auto;
+      height:auto;
+      max-height:48vh;
+      border-right:none;
+      border-bottom:1px solid var(--line);
+    }
+    #stage{padding:10px}
+  }
+</style>
+</head>
+<body>
+
+<aside id="panel">
+  <a href="index.html" style="display:inline-block;margin-bottom:10px;color:var(--accent);text-decoration:none;font-size:13px">← Volver a CurisFandom</a>
+  <h1>Calcador de portadas<span id="sizeSub">Lienzo 1080 × 1920 · exporta en resolución real</span></h1>
+
+  <div class="group">
+    <div class="hint">Herramienta de CurisFandom para hacer Curis <b>originales</b>: calcá una pose o foto propia, dibujá encima y exportá el PNG. Después subilo en <a href="subir.html" style="color:var(--accent)">Subir tu Curis</a>.</div>
+  </div>
+
+  <div class="group">
+    <div class="label">Formato del lienzo</div>
+    <select id="formatSelect">
+      <option value="1080x1920">Vertical 9:16 — 1080×1920 (TikTok / Reels)</option>
+      <option value="1080x1350">Vertical 4:5 — 1080×1350 (Instagram)</option>
+      <option value="1080x1440">Vertical 3:4 — 1080×1440</option>
+      <option value="1080x1080">Cuadrado 1:1 — 1080×1080</option>
+      <option value="1920x1080">Horizontal 16:9 — 1920×1080</option>
+      <option value="1280x720">Horizontal 16:9 — 1280×720 (YouTube)</option>
+      <option value="2000x1080">Horizontal ancho — 2000×1080</option>
+      <option value="custom">Personalizado…</option>
+    </select>
+    <div id="customFormat" hidden>
+      <input type="number" id="customW" min="64" max="4096" step="2" value="1080">
+      <span>×</span>
+      <input type="number" id="customH" min="64" max="4096" step="2" value="1920">
+      <button id="applyFormatBtn">Aplicar</button>
+    </div>
+    <select id="resizeMode">
+      <option value="scale">Al cambiar: reescalar el dibujo al nuevo tamaño</option>
+      <option value="keep">Al cambiar: mantener el dibujo a tamaño real (recorta / agranda el lienzo)</option>
+    </select>
+    <div class="hint">Con <b>reescalar</b>, el dibujo se estira para ocupar el nuevo formato. Con <b>mantener a tamaño real</b>, queda centrado sin deformarse: lo que sobra se recorta y lo que falta se agrega como lienzo vacío. Máx. 4096 px por lado.</div>
+  </div>
+
+  <div class="group">
+    <div class="label">Imagen de referencia</div>
+    <button id="uploadBtn">📂 Subir imagen de referencia</button>
+    <button id="removeRefBtn" disabled>❌ Quitar referencia</button>
+    <button id="toggleRefBtn" disabled>👁️ Ocultar referencia</button>
+    <button id="refEditBtn" disabled>🖐️ Mover / escalar referencia</button>
+    <button id="refOnTopBtn" disabled>⬆️ Poner referencia encima</button>
+    <input type="file" id="fileInput" accept="image/*" hidden>
+
+    <div class="slider-head"><span class="label">Opacidad de la referencia</span> <b id="refOpacityVal">100 %</b></div>
+    <input type="range" id="refOpacityInput" min="5" max="100" value="100" step="1" disabled>
+
+    <div class="slider-head"><span class="label">Tamaño de la referencia</span> <b id="refScaleVal">100 %</b></div>
+    <input type="range" id="refScaleInput" min="10" max="500" value="100" step="1" disabled>
+
+    <div class="slider-head"><span class="label">Rotación de la referencia</span> <b id="refRotVal">0°</b></div>
+    <input type="range" id="refRotInput" min="-180" max="180" value="0" step="1" disabled>
+    <div class="row">
+      <button id="rotLeftBtn" disabled>⟲ 90°</button>
+      <button id="rotRightBtn" disabled>90° ⟳</button>
+    </div>
+    <div class="row">
+      <button id="flipHBtn" disabled>⇋ Voltear H</button>
+      <button id="flipVBtn" disabled>⇅ Voltear V</button>
+    </div>
+
+    <button id="refResetBtn" disabled>↺ Reajustar referencia</button>
+    <div class="hint">
+      Con <b>Mover / escalar</b> activo: arrastrá sobre el lienzo para reubicar la
+      referencia y usá la <b>rueda del mouse</b> para acercar o alejar.
+      Mantené <kbd>Espacio</kbd> o <kbd>T</kbd> para espiar solo tu dibujo.
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="label">Boceto automático</div>
+    <div class="row">
+      <button id="sketchContourBtn" class="active">Contorno</button>
+      <button id="sketchPencilBtn">Lápiz</button>
+    </div>
+    <div class="slider-head"><span class="label">Cantidad de línea</span> <b id="sketchAmountVal">55</b></div>
+    <input type="range" id="sketchAmountInput" min="1" max="100" value="55">
+    <div class="slider-head"><span class="label">Grosor de línea</span> <b id="sketchWeightVal">1 px</b></div>
+    <input type="range" id="sketchWeightInput" min="1" max="4" value="1">
+    <div class="slider-head"><span class="label">Opacidad al aplicar</span> <b id="sketchApplyVal">90 %</b></div>
+    <input type="range" id="sketchApplyInput" min="10" max="100" value="90">
+    <button id="sketchBtn" disabled>✨ Generar boceto sobre el lienzo</button>
+    <div class="hint">
+      Traza las líneas de la referencia sobre tu dibujo (se puede deshacer con
+      <kbd>Ctrl</kbd>+<kbd>Z</kbd>). Después solo pintás y agregás el texto.
+      Funciona mejor con fotos de fondo simple.
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="label">Herramienta</div>
+    <div class="row">
+      <button id="brushBtn" class="active">✏️ Pincel</button>
+      <button id="eraserBtn">🧽 Borrador</button>
+    </div>
+    <button id="eyedropperBtn">💧 Cuentagotas (tomar color)</button>
+  </div>
+
+  <div class="group">
+    <div class="label">Color</div>
+    <div class="color-wrap">
+      <input type="color" id="colorInput" value="#ff3b3b">
+      <div class="swatches" id="swatches"></div>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="slider-head"><span class="label">Grosor</span> <b id="sizeVal">6 px</b></div>
+    <input type="range" id="sizeInput" min="1" max="120" value="6">
+    <div class="slider-head"><span class="label">Opacidad del pincel</span> <b id="brushOpacityVal">100 %</b></div>
+    <input type="range" id="brushOpacityInput" min="10" max="100" value="100">
+    <button id="pressureBtn">🖊️ Presión del lápiz (tableta)</button>
+    <div class="hint">
+      La opacidad se aplica al trazo entero (no se acumula donde se cruza consigo mismo).
+      La <b>presión</b> hace que el grosor siga la fuerza del lápiz en tabletas / pantallas compatibles.
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="label">Fondo del dibujo</div>
+    <div class="row">
+      <button id="bgTransparentBtn" class="active">Transp.</button>
+      <button id="bgWhiteBtn">Blanco</button>
+      <button id="bgBlackBtn">Negro</button>
+    </div>
+    <div class="hint">El fondo transparente es el ideal para calcar. Blanco/negro se incluyen al exportar.</div>
+  </div>
+
+  <div class="group">
+    <div class="label">Vista (zoom del lienzo)</div>
+    <div class="slider-head"><span class="label">Zoom</span> <b id="zoomVal">100 %</b></div>
+    <input type="range" id="zoomInput" min="100" max="800" value="100" step="5">
+    <button id="resetViewBtn" disabled>↺ Reajustar vista</button>
+    <div class="hint">
+      <kbd>Ctrl</kbd> + rueda del mouse para acercar, dos dedos para
+      pellizcar/mover en pantallas táctiles, rueda del mouse del medio para
+      desplazar. <kbd>0</kbd> reajusta.
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="label">Acciones</div>
+    <div class="row">
+      <button id="undoBtn">↶ Deshacer</button>
+      <button id="redoBtn">↷ Rehacer</button>
+    </div>
+    <button id="clearBtn" class="danger">🗑️ Limpiar todo el lienzo</button>
+    <button id="newBtn" class="danger">🆕 Empezar de cero</button>
+    <div class="hint">Tu trabajo se guarda solo en este navegador y se recupera al volver a abrir.</div>
+  </div>
+
+  <div class="group">
+    <div class="label">Exportar</div>
+    <button id="saveBtn">💾 Guardar como PNG</button>
+    <div class="hint">Exporta solo tu dibujo (con el fondo elegido) en la resolución del formato. La imagen de referencia nunca se incluye.</div>
+  </div>
+</aside>
+
+<main id="stage">
+  <div id="frame" class="bg-transparent">
+    <img id="refImg" alt="referencia" hidden>
+    <canvas id="drawCanvas" width="1080" height="1920"></canvas>
+    <button id="peekBtn">👁️ Referencia</button>
+  </div>
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const KEY = 'calcador:session:v2';
+
+  // Resolución interna del lienzo (mutable: el formato se puede cambiar)
+  let W = 1080, H = 1920;
+  const MAX_SIDE = 4096;
+
+  const canvas   = document.getElementById('drawCanvas');
+  const ctx      = canvas.getContext('2d', { willReadFrequently:true });
+  const stage    = document.getElementById('stage');
+  const frame    = document.getElementById('frame');
+  const refImg   = document.getElementById('refImg');
+  const sizeSub  = document.getElementById('sizeSub');
+
+  const fileInput   = document.getElementById('fileInput');
+  const uploadBtn   = document.getElementById('uploadBtn');
+  const removeRefBtn= document.getElementById('removeRefBtn');
+  const toggleRefBtn= document.getElementById('toggleRefBtn');
+  const refEditBtn  = document.getElementById('refEditBtn');
+  const refOnTopBtn = document.getElementById('refOnTopBtn');
+  const refScaleInput = document.getElementById('refScaleInput');
+  const refScaleVal = document.getElementById('refScaleVal');
+  const refOpacityInput = document.getElementById('refOpacityInput');
+  const refOpacityVal   = document.getElementById('refOpacityVal');
+  const refRotInput = document.getElementById('refRotInput');
+  const refRotVal   = document.getElementById('refRotVal');
+  const rotLeftBtn  = document.getElementById('rotLeftBtn');
+  const rotRightBtn = document.getElementById('rotRightBtn');
+  const flipHBtn    = document.getElementById('flipHBtn');
+  const flipVBtn    = document.getElementById('flipVBtn');
+  const refResetBtn = document.getElementById('refResetBtn');
+  const peekBtn     = document.getElementById('peekBtn');
+
+  const sketchContourBtn = document.getElementById('sketchContourBtn');
+  const sketchPencilBtn  = document.getElementById('sketchPencilBtn');
+  const sketchAmountInput= document.getElementById('sketchAmountInput');
+  const sketchAmountVal  = document.getElementById('sketchAmountVal');
+  const sketchWeightInput= document.getElementById('sketchWeightInput');
+  const sketchWeightVal  = document.getElementById('sketchWeightVal');
+  const sketchApplyInput = document.getElementById('sketchApplyInput');
+  const sketchApplyVal   = document.getElementById('sketchApplyVal');
+  const sketchBtn        = document.getElementById('sketchBtn');
+
+  const formatSelect  = document.getElementById('formatSelect');
+  const customFormat  = document.getElementById('customFormat');
+  const customW       = document.getElementById('customW');
+  const customH       = document.getElementById('customH');
+  const applyFormatBtn= document.getElementById('applyFormatBtn');
+
+  const brushBtn  = document.getElementById('brushBtn');
+  const eraserBtn = document.getElementById('eraserBtn');
+  const eyedropperBtn = document.getElementById('eyedropperBtn');
+  const colorInput= document.getElementById('colorInput');
+  const sizeInput = document.getElementById('sizeInput');
+  const sizeVal   = document.getElementById('sizeVal');
+  const brushOpacityInput = document.getElementById('brushOpacityInput');
+  const brushOpacityVal   = document.getElementById('brushOpacityVal');
+  const pressureBtn = document.getElementById('pressureBtn');
+  const resizeModeSelect = document.getElementById('resizeMode');
+
+  const bgBtns = {
+    transparent: document.getElementById('bgTransparentBtn'),
+    white:       document.getElementById('bgWhiteBtn'),
+    black:       document.getElementById('bgBlackBtn')
+  };
+
+  const zoomInput    = document.getElementById('zoomInput');
+  const zoomVal      = document.getElementById('zoomVal');
+  const resetViewBtn = document.getElementById('resetViewBtn');
+
+  const undoBtn = document.getElementById('undoBtn');
+  const redoBtn = document.getElementById('redoBtn');
+  const clearBtn= document.getElementById('clearBtn');
+  const newBtn  = document.getElementById('newBtn');
+  const saveBtn = document.getElementById('saveBtn');
+
+  // ---------- Estado ----------
+  const state = {
+    tool: 'brush',        // 'brush' | 'eraser' | 'eyedropper'
+    mode: 'draw',         // 'draw' | 'refedit'
+    color: colorInput.value,
+    size: parseInt(sizeInput.value, 10),
+    bg: 'transparent',
+    pressure: false,      // el grosor sigue ev.pressure (lápiz / tableta)
+    refHiddenByButton: false,
+    refPeeking: false,
+    refOnTop: false,
+    hasRef: false
+  };
+
+  let brushOpacity = 1;              // 0.1..1, se aplica al trazo completo
+  let resizeMode = 'scale';          // 'scale' | 'keep' al cambiar de formato
+
+  // Transformación de la referencia (independiente de la resolución)
+  let refX = 0, refY = 0;        // desplazamiento en fracción del lienzo
+  let refScale = 1;              // 1 = "cover"
+  let refRotation = 0;           // grados
+  let refFlipH = false, refFlipV = false;
+  let refOpacity = 1;            // 0..1
+  let refStore = null;           // dataURL compacto de la referencia (para localStorage)
+
+  // Boceto automático (detección de contornos / efecto lápiz, todo local)
+  let sketchMethod = 'contorno'; // 'contorno' | 'lapiz'
+  let sketchAmount = 55;         // 1..100
+  let sketchWeight = 1;          // 1..4 (grosor)
+  let sketchApplyOpacity = 0.9;  // 0..1
+
+  // Vista (zoom / paneo del lienzo entero, solo visual)
+  let viewScale = 1, viewX = 0, viewY = 0;
+
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // ---------- Ajuste del marco a la pantalla (CSS) ----------
+  function fitFrame(){
+    const cs = getComputedStyle(stage);
+    const px = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const py = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    const availW = Math.max(40, stage.clientWidth - px);
+    const availH = Math.max(40, stage.clientHeight - py);
+    const ar = W / H;
+    let w = availW, h = w / ar;
+    if (h > availH){ h = availH; w = h * ar; }
+    frame.style.width  = Math.round(w) + 'px';
+    frame.style.height = Math.round(h) + 'px';
+  }
+  window.addEventListener('resize', fitFrame);
+
+  // ---------- Vista (zoom del lienzo) ----------
+  function applyView(){
+    if (viewScale <= 1.001){ viewScale = 1; viewX = 0; viewY = 0; }
+    frame.style.transform = (viewScale === 1 && !viewX && !viewY)
+      ? '' : 'translate(' + viewX + 'px, ' + viewY + 'px) scale(' + viewScale + ')';
+    zoomInput.value = Math.round(viewScale * 100);
+    zoomVal.textContent = Math.round(viewScale * 100) + ' %';
+    resetViewBtn.disabled = (viewScale === 1 && !viewX && !viewY);
+  }
+  function zoomView(factor, sx, sy){
+    const r = frame.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    const prev = viewScale;
+    viewScale = clamp(viewScale * factor, 1, 8);
+    const k = viewScale / prev;
+    if (k === 1) return;
+    const dx = (sx == null ? cx : sx) - cx;
+    const dy = (sy == null ? cy : sy) - cy;
+    viewX += dx * (1 - k);
+    viewY += dy * (1 - k);
+    applyView();
+    scheduleSave();
+  }
+  function resetView(){
+    viewScale = 1; viewX = 0; viewY = 0;
+    applyView();
+    scheduleSave();
+  }
+  zoomInput.addEventListener('input', () => {
+    const target = parseInt(zoomInput.value, 10) / 100;
+    if (target > 0) zoomView(target / viewScale, null, null);
+  });
+  resetViewBtn.addEventListener('click', resetView);
+  stage.addEventListener('wheel', (ev) => {
+    if (!(ev.ctrlKey || ev.metaKey)) return;
+    ev.preventDefault();
+    zoomView(ev.deltaY < 0 ? 1.12 : 1 / 1.12, ev.clientX, ev.clientY);
+  }, { passive:false });
+
+  // ---------- Historial (deshacer / rehacer) ----------
+  let HISTORY_LIMIT = 12;
+  let undoStack = [];
+  let redoStack = [];
+
+  function recomputeHistoryLimit(){
+    // ~150 MB de presupuesto para snapshots
+    HISTORY_LIMIT = clamp(Math.floor(150000000 / (W * H * 4)), 3, 20);
+  }
+  recomputeHistoryLimit();
+
+  function snapshot(){
+    try{
+      undoStack.push(ctx.getImageData(0, 0, W, H));
+      while (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+      redoStack = [];
+    }catch(e){}
+    refreshHistoryButtons();
+  }
+  function restore(from, to){
+    const img = from.pop();
+    if (!img) return;
+    try{
+      to.push(ctx.getImageData(0, 0, W, H));
+      ctx.putImageData(img, 0, 0);
+    }catch(e){}
+    refreshHistoryButtons();
+    scheduleSave();
+  }
+  function refreshHistoryButtons(){
+    undoBtn.disabled = undoStack.length === 0;
+    redoBtn.disabled = redoStack.length === 0;
+  }
+  refreshHistoryButtons();
+
+  function isCanvasEmpty(){
+    try{
+      const d = ctx.getImageData(0, 0, W, H).data;
+      for (let i = 3; i < d.length; i += 4) if (d[i] !== 0) return false;
+      return true;
+    }catch(e){ return true; }
+  }
+
+  // ---------- Cambio de formato del lienzo ----------
+  function resizeCanvas(nw, nh){
+    nw = clamp(Math.round(nw) || 0, 64, MAX_SIDE);
+    nh = clamp(Math.round(nh) || 0, 64, MAX_SIDE);
+    if (nw === W && nh === H){ syncFormatSelect(); return; }
+
+    const hadContent = !isCanvasEmpty();
+    const keep = resizeMode === 'keep';
+    const msg = keep
+      ? 'Cambiar el formato a ' + nw + '×' + nh + ' va a mantener tu dibujo a tamaño real y centrado (lo que sobre se recorta). ¿Continuar?'
+      : 'Cambiar el formato va a reescalar tu dibujo a ' + nw + '×' + nh + '. ¿Continuar?';
+    if (hadContent && !confirm(msg)){
+      syncFormatSelect();
+      return;
+    }
+
+    let tmp = null;
+    if (hadContent){
+      tmp = document.createElement('canvas');
+      tmp.width = W; tmp.height = H;
+      tmp.getContext('2d').drawImage(canvas, 0, 0);
+    }
+
+    W = nw; H = nh;
+    canvas.width = nw;
+    canvas.height = nh;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    if (tmp){
+      if (keep){
+        ctx.drawImage(tmp, Math.round((nw - tmp.width) / 2), Math.round((nh - tmp.height) / 2));
+      } else {
+        ctx.drawImage(tmp, 0, 0, tmp.width, tmp.height, 0, 0, nw, nh);
+      }
+    }
+
+    undoStack = []; redoStack = [];
+    recomputeHistoryLimit();
+    refreshHistoryButtons();
+
+    sizeSub.textContent = 'Lienzo ' + W + ' × ' + H + ' · exporta en resolución real';
+    syncFormatSelect();
+    resetView();
+    fitFrame();
+    scheduleSave();
+  }
+
+  function syncFormatSelect(){
+    const key = W + 'x' + H;
+    let matched = false;
+    for (const opt of formatSelect.options){
+      if (opt.value === key){ formatSelect.value = key; matched = true; break; }
+    }
+    if (!matched) formatSelect.value = 'custom';
+    customFormat.hidden = formatSelect.value !== 'custom';
+    if (formatSelect.value === 'custom'){ customW.value = W; customH.value = H; }
+  }
+
+  formatSelect.addEventListener('change', () => {
+    if (formatSelect.value === 'custom'){
+      customFormat.hidden = false;
+      customW.value = W; customH.value = H;
+      return;
+    }
+    customFormat.hidden = true;
+    const [w, h] = formatSelect.value.split('x').map(Number);
+    resizeCanvas(w, h);
+  });
+  applyFormatBtn.addEventListener('click', () => {
+    resizeCanvas(parseInt(customW.value, 10), parseInt(customH.value, 10));
+  });
+  resizeModeSelect.addEventListener('change', () => {
+    resizeMode = resizeModeSelect.value === 'keep' ? 'keep' : 'scale';
+    scheduleSave();
+  });
+
+  // ---------- Dibujo ----------
+  let drawing = false;
+  let last = null, downP = null;
+  let strokeMoved = false, strokeCommitted = false;
+  let layered = false;                 // este trazo se pinta en una capa aparte (opacidad < 100)
+  let strokeLayer = null, strokeLayerCtx = null;   // capa temporal del trazo
+  let strokeBase = null;                            // copia del dibujo al empezar el trazo
+
+  function pointerPos(ev){
+    const r = canvas.getBoundingClientRect();
+    return {
+      x: (ev.clientX - r.left) * (W / r.width),
+      y: (ev.clientY - r.top)  * (H / r.height)
+    };
+  }
+
+  // Grosor efectivo del trazo según la presión del puntero (si está activada)
+  function strokeWidthFor(pr){
+    if (!state.pressure) return state.size;
+    return Math.max(0.5, state.size * (0.15 + 0.85 * clamp(pr || 0, 0, 1)));
+  }
+
+  function ensureStrokeLayer(){
+    if (!strokeLayer) strokeLayer = document.createElement('canvas');
+    if (!strokeBase)  strokeBase  = document.createElement('canvas');
+    for (const c of [strokeLayer, strokeBase]){
+      if (c.width !== W || c.height !== H){ c.width = W; c.height = H; }
+    }
+    strokeLayerCtx = strokeLayer.getContext('2d');
+    strokeLayerCtx.clearRect(0, 0, W, H);
+    strokeLayerCtx.lineCap = 'round';
+    strokeLayerCtx.lineJoin = 'round';
+    const b = strokeBase.getContext('2d');
+    b.clearRect(0, 0, W, H);
+    b.drawImage(canvas, 0, 0);
+  }
+  // Reconstruye el lienzo = dibujo previo + trazo actual aplicado a brushOpacity
+  function compositeLayer(){
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(strokeBase, 0, 0);
+    ctx.globalAlpha = brushOpacity;
+    ctx.drawImage(strokeLayer, 0, 0);
+    ctx.globalAlpha = 1;
+  }
+
+  function applyStroke(target, w){
+    target.lineWidth = w;
+    if (state.tool === 'eraser'){
+      target.globalCompositeOperation = 'destination-out';
+      target.strokeStyle = 'rgba(0,0,0,1)';
+    } else {
+      target.globalCompositeOperation = 'source-over';
+      target.strokeStyle = state.color;
+    }
+  }
+  function commitStroke(){
+    if (strokeCommitted) return;
+    snapshot();
+    if (layered) ensureStrokeLayer();
+    strokeCommitted = true;
+  }
+  function stampDot(p){
+    const target = layered ? strokeLayerCtx : ctx;
+    const w = strokeWidthFor(p && p.pr);
+    const prevOp = target.globalCompositeOperation;
+    target.globalCompositeOperation = (state.tool === 'eraser') ? 'destination-out' : 'source-over';
+    target.beginPath();
+    target.arc(p.x, p.y, Math.max(0.4, w / 2), 0, Math.PI * 2);
+    target.fillStyle = (state.tool === 'eraser') ? 'rgba(0,0,0,1)' : state.color;
+    target.fill();
+    target.globalCompositeOperation = prevOp;
+    if (layered) compositeLayer();
+  }
+
+  function startDraw(ev){
+    if (ev.button !== undefined && ev.button !== 0) return;
+    drawing = true;
+    strokeMoved = false;
+    strokeCommitted = false;
+    layered = (state.tool === 'brush' && brushOpacity < 1);
+    const p = pointerPos(ev);
+    p.pr = ev.pressure;
+    last = p; downP = p;
+    try{ canvas.setPointerCapture(ev.pointerId); }catch(e){}
+  }
+
+  function moveDraw(ev){
+    if (!drawing) return;
+    commitStroke();
+    if (!strokeMoved){ strokeMoved = true; stampDot(downP); }
+    const events = (ev.getCoalescedEvents && ev.getCoalescedEvents().length)
+      ? ev.getCoalescedEvents() : [ev];
+    const target = layered ? strokeLayerCtx : ctx;
+    if (state.pressure){
+      for (const e of events){
+        const p = pointerPos(e);
+        applyStroke(target, strokeWidthFor(e.pressure));
+        target.beginPath();
+        target.moveTo(last.x, last.y);
+        target.lineTo(p.x, p.y);
+        target.stroke();
+        last = p;
+      }
+    } else {
+      applyStroke(target, state.size);
+      target.beginPath();
+      target.moveTo(last.x, last.y);
+      for (const e of events){
+        const p = pointerPos(e);
+        target.lineTo(p.x, p.y);
+        last = p;
+      }
+      target.stroke();
+    }
+    if (layered) compositeLayer();
+  }
+
+  function endDraw(){
+    if (!drawing) return;
+    drawing = false;
+    if (!strokeMoved && !strokeCommitted){   // toque simple → punto
+      commitStroke();
+      stampDot(downP);
+    } else if (layered){
+      compositeLayer();
+    }
+    last = null; downP = null;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+    layered = false;
+    scheduleSave();
+  }
+
+  function cancelStroke(){
+    if (!drawing) return;
+    if (strokeCommitted){ endDraw(); return; }
+    drawing = false; last = null; downP = null;
+    layered = false;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+  }
+
+  // ---------- Mover / escalar / rotar la referencia ----------
+  let panning = false, panStart = null;
+
+  function applyRefTransform(){
+    const sx = refScale * (refFlipH ? -1 : 1);
+    const sy = refScale * (refFlipV ? -1 : 1);
+    let tr = 'translate(' + (refX * 100) + '%, ' + (refY * 100) + '%)';
+    if (refRotation) tr += ' rotate(' + refRotation + 'deg)';
+    tr += (sx === sy) ? ' scale(' + sx + ')' : ' scale(' + sx + ', ' + sy + ')';
+    refImg.style.transform = tr;
+  }
+  function setRefScale(s, fromSlider){
+    refScale = clamp(s, 0.1, 10);
+    if (!fromSlider) refScaleInput.value = Math.round(refScale * 100);
+    refScaleVal.textContent = Math.round(refScale * 100) + ' %';
+    applyRefTransform();
+  }
+  function wrap180(a){ a = ((a % 360) + 360) % 360; return a > 180 ? a - 360 : a; }
+  function setRefRotation(deg, fromSlider){
+    refRotation = wrap180(deg);
+    if (!fromSlider) refRotInput.value = refRotation;
+    refRotVal.textContent = Math.round(refRotation) + '°';
+    applyRefTransform();
+  }
+  function setRefFlip(h, v){
+    refFlipH = h; refFlipV = v;
+    flipHBtn.classList.toggle('active', refFlipH);
+    flipVBtn.classList.toggle('active', refFlipV);
+    applyRefTransform();
+  }
+  function setRefOpacity(o, fromSlider){
+    refOpacity = clamp(o, 0.05, 1);
+    if (!fromSlider) refOpacityInput.value = Math.round(refOpacity * 100);
+    refOpacityVal.textContent = Math.round(refOpacity * 100) + ' %';
+    updateRefVisibility();
+  }
+  function resetRefTransform(){
+    refX = 0; refY = 0;
+    setRefRotation(0);
+    setRefFlip(false, false);
+    setRefScale(1);
+  }
+
+  function startRefPan(ev){
+    const r = canvas.getBoundingClientRect();
+    panning = true;
+    panStart = { x: ev.clientX, y: ev.clientY, rx: refX, ry: refY, w: r.width, h: r.height };
+    frame.classList.add('grabbing');
+    try{ canvas.setPointerCapture(ev.pointerId); }catch(e){}
+  }
+  function moveRefPan(ev){
+    if (!panning) return;
+    refX = panStart.rx + (ev.clientX - panStart.x) / panStart.w;
+    refY = panStart.ry + (ev.clientY - panStart.y) / panStart.h;
+    applyRefTransform();
+  }
+  function endRefPan(){
+    if (!panning) return;
+    panning = false;
+    frame.classList.remove('grabbing');
+    scheduleSave();
+  }
+
+  frame.addEventListener('wheel', (ev) => {
+    if (ev.ctrlKey || ev.metaKey) return;            // ctrl+rueda = zoom de la vista
+    if (state.mode !== 'refedit' || !state.hasRef) return;
+    ev.preventDefault();
+    setRefScale(refScale * (ev.deltaY < 0 ? 1.09 : 1 / 1.09));
+    scheduleSave();
+  }, { passive:false });
+
+  refScaleInput.addEventListener('input', () => {
+    setRefScale(parseInt(refScaleInput.value, 10) / 100, true);
+    scheduleSave();
+  });
+  refOpacityInput.addEventListener('input', () => {
+    setRefOpacity(parseInt(refOpacityInput.value, 10) / 100, true);
+    scheduleSave();
+  });
+  refRotInput.addEventListener('input', () => {
+    setRefRotation(parseInt(refRotInput.value, 10), true);
+    scheduleSave();
+  });
+  rotLeftBtn.addEventListener('click', () => { setRefRotation(refRotation - 90); scheduleSave(); });
+  rotRightBtn.addEventListener('click', () => { setRefRotation(refRotation + 90); scheduleSave(); });
+  flipHBtn.addEventListener('click', () => { setRefFlip(!refFlipH, refFlipV); scheduleSave(); });
+  flipVBtn.addEventListener('click', () => { setRefFlip(refFlipH, !refFlipV); scheduleSave(); });
+  refResetBtn.addEventListener('click', () => { resetRefTransform(); scheduleSave(); });
+  refOnTopBtn.addEventListener('click', () => {
+    state.refOnTop = !state.refOnTop;
+    refOnTopBtn.classList.toggle('active', state.refOnTop);
+    refOnTopBtn.textContent = state.refOnTop ? '⬇️ Poner referencia debajo' : '⬆️ Poner referencia encima';
+    frame.classList.toggle('ref-on-top', state.refOnTop);
+    scheduleSave();
+  });
+
+  // ---------- Router de eventos de puntero ----------
+  const pointers = new Map();
+  let gestureLock = false;
+
+  // Zoom de la vista con dos dedos
+  let pinching = false, pinchStart = null;
+  function twoPoints(){
+    const it = [...pointers.values()];
+    return [it[0], it[1]];
+  }
+  function startPinch(){
+    const [a, b] = twoPoints();
+    if (!a || !b) return;
+    const dist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+    const r = frame.getBoundingClientRect();
+    pinchStart = {
+      dist,
+      midX: (a.x + b.x) / 2, midY: (a.y + b.y) / 2,
+      cx: r.left + r.width / 2, cy: r.top + r.height / 2,
+      vs: viewScale, vx: viewX, vy: viewY
+    };
+    pinching = true;
+    gestureLock = true;
+  }
+  function movePinch(){
+    if (!pinching) return;
+    const [a, b] = twoPoints();
+    if (!a || !b) return;
+    const dist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+    const midX = (a.x + b.x) / 2, midY = (a.y + b.y) / 2;
+    const vs = clamp(pinchStart.vs * (dist / pinchStart.dist), 1, 8);
+    const k = vs / pinchStart.vs;
+    const dx = pinchStart.midX - pinchStart.cx;
+    const dy = pinchStart.midY - pinchStart.cy;
+    viewScale = vs;
+    viewX = pinchStart.vx + (midX - pinchStart.midX) + dx * (1 - k);
+    viewY = pinchStart.vy + (midY - pinchStart.midY) + dy * (1 - k);
+    applyView();
+  }
+  function endPinch(){
+    pinching = false; pinchStart = null;
+    scheduleSave();
+  }
+
+  // Desplazamiento de la vista con el botón del medio del mouse
+  let viewPanning = false, vpanStart = null;
+  function startViewPan(ev){
+    viewPanning = true;
+    vpanStart = { x: ev.clientX, y: ev.clientY, vx: viewX, vy: viewY };
+    frame.classList.add('grabbing');
+    try{ canvas.setPointerCapture(ev.pointerId); }catch(e){}
+  }
+  function moveViewPan(ev){
+    if (!viewPanning) return;
+    viewX = vpanStart.vx + (ev.clientX - vpanStart.x);
+    viewY = vpanStart.vy + (ev.clientY - vpanStart.y);
+    applyView();
+  }
+  function endViewPan(){
+    if (!viewPanning) return;
+    viewPanning = false;
+    frame.classList.remove('grabbing');
+    scheduleSave();
+  }
+
+  canvas.addEventListener('pointerdown', (ev) => {
+    pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+
+    if (ev.pointerType === 'mouse' && ev.button === 1){
+      ev.preventDefault();
+      startViewPan(ev);
+      return;
+    }
+    if (pointers.size >= 2){
+      cancelStroke();
+      endRefPan();
+      startPinch();
+      return;
+    }
+    if (gestureLock) return;
+    if (state.tool === 'eyedropper') return;   // se resuelve en 'click'
+    if (state.mode === 'refedit' && state.hasRef) return startRefPan(ev);
+    startDraw(ev);
+  });
+
+  canvas.addEventListener('pointermove', (ev) => {
+    if (pointers.has(ev.pointerId)) pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    if (viewPanning) return moveViewPan(ev);
+    if (pinching) return movePinch();
+    if (panning) return moveRefPan(ev);
+    moveDraw(ev);
+  });
+
+  function onPointerUp(ev){
+    if (ev && ev.pointerId !== undefined) pointers.delete(ev.pointerId);
+    if (viewPanning) endViewPan();
+    if (pinching && pointers.size < 2) endPinch();
+    if (pointers.size === 0){
+      gestureLock = false;
+      endRefPan();
+      endDraw();
+    }
+  }
+  ['pointerup','pointercancel','pointerleave'].forEach(t => {
+    canvas.addEventListener(t, onPointerUp);
+  });
+
+  // Evitar el autoscroll del botón del medio
+  canvas.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
+
+  // Cuentagotas
+  canvas.addEventListener('click', (ev) => {
+    if (state.tool !== 'eyedropper') return;
+    const hex = sampleAt(ev.clientX, ev.clientY);
+    if (hex) setColor(hex);
+    setTool('brush');
+  });
+
+  // ---------- Referencia: carga y visibilidad ----------
+  function updateRefVisibility(){
+    const visible = state.hasRef && !state.refHiddenByButton && !state.refPeeking;
+    refImg.style.opacity = visible ? String(refOpacity) : '0';
+    peekBtn.hidden = !state.hasRef;
+    toggleRefBtn.textContent = state.refHiddenByButton ? '👁️ Mostrar referencia' : '👁️ Ocultar referencia';
+    toggleRefBtn.classList.toggle('active', state.refHiddenByButton);
+    peekBtn.textContent = state.refHiddenByButton ? '👁️ Mostrar' : '👁️ Ocultar';
+  }
+  function refVisibleNow(){
+    return state.hasRef && !state.refHiddenByButton && !state.refPeeking;
+  }
+
+  function setRefControlsEnabled(on){
+    const els = [removeRefBtn, toggleRefBtn, refEditBtn, refOnTopBtn, refScaleInput,
+                 refOpacityInput, refRotInput, rotLeftBtn, rotRightBtn, flipHBtn,
+                 flipVBtn, refResetBtn, sketchBtn];
+    els.forEach(e => { e.disabled = !on; });
+    if (!on) setRefEditMode(false);
+  }
+
+  // Referencia → canvas temporal (para el cuentagotas). Replica object-fit:cover
+  // + el transform CSS (translate / rotate / scale / flip).
+  function drawReferenceTo(t, alpha){
+    const iw = refImg.naturalWidth, ih = refImg.naturalHeight;
+    if (!iw || !ih) return;
+    const cover = Math.max(W / iw, H / ih);
+    const dw = iw * cover, dh = ih * cover;
+    t.save();
+    t.translate(W / 2 + refX * W, H / 2 + refY * H);
+    t.rotate(refRotation * Math.PI / 180);
+    t.scale(refScale * (refFlipH ? -1 : 1), refScale * (refFlipV ? -1 : 1));
+    t.globalAlpha = clamp(alpha == null ? refOpacity : alpha, 0, 1);
+    try{ t.drawImage(refImg, -dw / 2, -dh / 2, dw, dh); }catch(e){}
+    t.restore();
+  }
+  function sampleAt(clientX, clientY){
+    const r = canvas.getBoundingClientRect();
+    const x = Math.round((clientX - r.left) * (W / r.width));
+    const y = Math.round((clientY - r.top)  * (H / r.height));
+    if (x < 0 || y < 0 || x >= W || y >= H) return null;
+    const tmp = document.createElement('canvas');
+    tmp.width = W; tmp.height = H;
+    const t = tmp.getContext('2d');
+    const onTop = state.refOnTop;
+    if (refVisibleNow() && !onTop) drawReferenceTo(t);
+    t.drawImage(canvas, 0, 0);
+    if (refVisibleNow() && onTop) drawReferenceTo(t);
+    let d;
+    try{ d = t.getImageData(x, y, 1, 1).data; }catch(e){ return null; }
+    if (d[3] === 0) return null;
+    const hx = n => n.toString(16).padStart(2, '0');
+    return '#' + hx(d[0]) + hx(d[1]) + hx(d[2]);
+  }
+
+  // Versión compacta de la referencia para guardar en localStorage
+  function makeRefStore(imgEl){
+    try{
+      const max = 1600;
+      let w = imgEl.naturalWidth, h = imgEl.naturalHeight;
+      if (!w || !h) return null;
+      const s = Math.min(1, max / Math.max(w, h));
+      w = Math.round(w * s); h = Math.round(h * s);
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(imgEl, 0, 0, w, h);
+      const webp = c.toDataURL('image/webp', 0.85);
+      if (webp.indexOf('data:image/webp') === 0) return webp;
+      return c.toDataURL('image/jpeg', 0.86);
+    }catch(e){ return null; }
+  }
+
+  // ---------- Boceto automático (local, sin IA externa) ----------
+  function dilateMax(field, w, h){
+    const out = new Float32Array(w * h);
+    for (let y = 0; y < h; y++){
+      for (let x = 0; x < w; x++){
+        let m = 0;
+        for (let dy = -1; dy <= 1; dy++){
+          const yy = y + dy; if (yy < 0 || yy >= h) continue;
+          for (let dx = -1; dx <= 1; dx++){
+            const xx = x + dx; if (xx < 0 || xx >= w) continue;
+            const v = field[yy * w + xx];
+            if (v > m) m = v;
+          }
+        }
+        out[y * w + x] = m;
+      }
+    }
+    return out;
+  }
+
+  function generateSketch(){
+    if (!state.hasRef) return;
+    const w = W, h = H, n = w * h;
+
+    const src = document.createElement('canvas');
+    src.width = w; src.height = h;
+    const sx = src.getContext('2d', { willReadFrequently:true });
+    sx.fillStyle = '#ffffff';
+    sx.fillRect(0, 0, w, h);                 // zonas sin referencia = blanco
+    drawReferenceTo(sx, 1);                  // referencia con su transform, opaca
+    const id = sx.getImageData(0, 0, w, h).data;
+
+    const g = new Float32Array(n);
+    for (let i = 0; i < n; i++){
+      g[i] = 0.299 * id[i*4] + 0.587 * id[i*4+1] + 0.114 * id[i*4+2];
+    }
+
+    const line = document.createElement('canvas');
+    line.width = w; line.height = h;
+    const out = line.getContext('2d').createImageData(w, h);
+    const LR = 34, LG = 34, LB = 34;        // color del trazo (gris oscuro)
+
+    if (sketchMethod === 'contorno'){
+      let strength = new Float32Array(n);
+      for (let y = 1; y < h - 1; y++){
+        for (let x = 1; x < w - 1; x++){
+          const i = y * w + x;
+          const gx = -g[i-w-1] - 2*g[i-1] - g[i+w-1] + g[i-w+1] + 2*g[i+1] + g[i+w+1];
+          const gy = -g[i-w-1] - 2*g[i-w] - g[i-w+1] + g[i+w-1] + 2*g[i+w] + g[i+w+1];
+          strength[i] = Math.hypot(gx, gy);
+        }
+      }
+      for (let k = 1; k < sketchWeight; k++) strength = dilateMax(strength, w, h);
+      const t = 92 - (sketchAmount / 100) * 80;   // más cantidad => menos umbral
+      for (let i = 0; i < n; i++){
+        const m = strength[i];
+        const a = m <= t ? 0 : clamp((m - t) / (t * 0.9 + 1), 0, 1);
+        out.data[i*4] = LR; out.data[i*4+1] = LG; out.data[i*4+2] = LB;
+        out.data[i*4+3] = Math.round(a * 255);
+      }
+    } else {
+      // lápiz: gris ÷ (invertido-desenfocado) = "color dodge"
+      const inv = document.createElement('canvas');
+      inv.width = w; inv.height = h;
+      const ix = inv.getContext('2d');
+      const ii = ix.createImageData(w, h);
+      for (let i = 0; i < n; i++){
+        const v = 255 - g[i];
+        ii.data[i*4] = ii.data[i*4+1] = ii.data[i*4+2] = v; ii.data[i*4+3] = 255;
+      }
+      ix.putImageData(ii, 0, 0);
+
+      const blur = document.createElement('canvas');
+      blur.width = w; blur.height = h;
+      const bx = blur.getContext('2d', { willReadFrequently:true });
+      bx.filter = 'blur(' + (2 + sketchWeight * 2) + 'px)';
+      bx.drawImage(inv, 0, 0);
+      bx.filter = 'none';
+      const bd = bx.getImageData(0, 0, w, h).data;
+
+      const contrast = 0.5 + (sketchAmount / 100) * 1.4;
+      for (let i = 0; i < n; i++){
+        const base = g[i], top = bd[i*4];
+        const v = top >= 255 ? 255 : Math.min(255, (base * 255) / (255 - top));
+        const a = clamp((255 - v) / 255 * contrast, 0, 1);
+        out.data[i*4] = LR; out.data[i*4+1] = LG; out.data[i*4+2] = LB;
+        out.data[i*4+3] = Math.round(a * 255);
+      }
+    }
+
+    line.getContext('2d').putImageData(out, 0, 0);
+    snapshot();
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = sketchApplyOpacity;
+    ctx.drawImage(line, 0, 0);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    scheduleSave();
+  }
+
+  function setSketchMethod(m){
+    sketchMethod = m;
+    sketchContourBtn.classList.toggle('active', m === 'contorno');
+    sketchPencilBtn.classList.toggle('active', m === 'lapiz');
+  }
+  sketchContourBtn.addEventListener('click', () => setSketchMethod('contorno'));
+  sketchPencilBtn.addEventListener('click', () => setSketchMethod('lapiz'));
+  sketchAmountInput.addEventListener('input', () => {
+    sketchAmount = parseInt(sketchAmountInput.value, 10);
+    sketchAmountVal.textContent = sketchAmount;
+  });
+  sketchWeightInput.addEventListener('input', () => {
+    sketchWeight = parseInt(sketchWeightInput.value, 10);
+    sketchWeightVal.textContent = sketchWeight + ' px';
+  });
+  sketchApplyInput.addEventListener('input', () => {
+    sketchApplyOpacity = parseInt(sketchApplyInput.value, 10) / 100;
+    sketchApplyVal.textContent = Math.round(sketchApplyOpacity * 100) + ' %';
+  });
+  sketchBtn.addEventListener('click', () => {
+    if (!state.hasRef || sketchBtn.disabled) return;
+    sketchBtn.disabled = true;
+    sketchBtn.textContent = 'Generando…';
+    setTimeout(() => {
+      try{ generateSketch(); }
+      catch(e){ alert('No se pudo generar el boceto: ' + (e && e.message || e)); }
+      sketchBtn.textContent = '✨ Generar boceto sobre el lienzo';
+      sketchBtn.disabled = !state.hasRef;
+    }, 30);
+  });
+
+  uploadBtn.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    refImg.onload = () => {
+      state.hasRef = true;
+      refImg.hidden = false;
+      state.refHiddenByButton = false;
+      resetRefTransform();
+      setRefControlsEnabled(true);
+      refStore = makeRefStore(refImg);
+      updateRefVisibility();
+      URL.revokeObjectURL(url);
+      scheduleSave();
+    };
+    refImg.onerror = () => { alert('No se pudo cargar la imagen.'); URL.revokeObjectURL(url); };
+    refImg.src = url;
+    fileInput.value = '';
+  });
+
+  function removeReference(){
+    state.hasRef = false;
+    refStore = null;
+    refImg.removeAttribute('src');
+    refImg.hidden = true;
+    state.refHiddenByButton = false;
+    state.refOnTop = false;
+    refOnTopBtn.classList.remove('active');
+    refOnTopBtn.textContent = '⬆️ Poner referencia encima';
+    frame.classList.remove('ref-on-top');
+    resetRefTransform();
+    setRefControlsEnabled(false);
+    updateRefVisibility();
+  }
+  removeRefBtn.addEventListener('click', () => { removeReference(); scheduleSave(); });
+
+  function toggleRef(){
+    if (!state.hasRef) return;
+    state.refHiddenByButton = !state.refHiddenByButton;
+    updateRefVisibility();
+    scheduleSave();
+  }
+  toggleRefBtn.addEventListener('click', toggleRef);
+  peekBtn.addEventListener('click', toggleRef);
+
+  function setRefEditMode(on){
+    state.mode = on ? 'refedit' : 'draw';
+    refEditBtn.classList.toggle('active', on);
+    frame.classList.toggle('refedit', on && state.hasRef);
+  }
+  refEditBtn.addEventListener('click', () => setRefEditMode(state.mode !== 'refedit'));
+
+  // Hotkey: mantener Espacio o T para espiar el dibujo
+  window.addEventListener('keydown', (e) => {
+    if (e.repeat) return;
+    const k = e.key.toLowerCase();
+    if (k === ' ' || k === 'spacebar' || k === 't'){
+      const el = document.activeElement, tag = (el && el.tagName) || '';
+      if ((tag === 'INPUT' && el.type !== 'range') || tag === 'SELECT') return;
+      e.preventDefault();
+      state.refPeeking = true;
+      updateRefVisibility();
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    const k = e.key.toLowerCase();
+    if (k === ' ' || k === 'spacebar' || k === 't'){
+      state.refPeeking = false;
+      updateRefVisibility();
+    }
+  });
+  window.addEventListener('blur', () => {
+    state.refPeeking = false; endRefPan(); endViewPan();
+    pointers.clear(); gestureLock = false; pinching = false;
+    updateRefVisibility();
+  });
+
+  // ---------- Herramientas ----------
+  function setTool(tool){
+    state.tool = tool;
+    setRefEditMode(false);           // elegir herramienta sale del modo referencia
+    brushBtn.classList.toggle('active', tool === 'brush');
+    eraserBtn.classList.toggle('active', tool === 'eraser');
+    eyedropperBtn.classList.toggle('active', tool === 'eyedropper');
+    canvas.style.cursor = (tool === 'eraser') ? 'cell'
+                        : (tool === 'eyedropper') ? 'copy' : 'crosshair';
+  }
+  brushBtn.addEventListener('click', () => setTool('brush'));
+  eraserBtn.addEventListener('click', () => setTool('eraser'));
+  eyedropperBtn.addEventListener('click', async () => {
+    if (window.EyeDropper){
+      try{
+        const res = await new window.EyeDropper().open();
+        if (res && res.sRGBHex) setColor(res.sRGBHex);
+      }catch(e){}
+      return;
+    }
+    setTool('eyedropper');   // sin API nativa: el próximo clic sobre el lienzo toma el color
+  });
+
+  const SWATCHES = ['#000000','#ffffff','#ff3b3b','#ff9f0a','#ffd60a','#34c759',
+                    '#0a84ff','#5e5ce6','#bf5af2','#ff375f','#8e8e93','#00c7be'];
+  const swWrap = document.getElementById('swatches');
+  SWATCHES.forEach(c => {
+    const b = document.createElement('button');
+    b.style.background = c;
+    b.title = c;
+    b.addEventListener('click', () => {
+      setColor(c);
+      [...swWrap.children].forEach(x => x.classList.toggle('active', x === b));
+    });
+    swWrap.appendChild(b);
+  });
+  function syncSwatches(){
+    [...swWrap.children].forEach((x, i) =>
+      x.classList.toggle('active', SWATCHES[i].toLowerCase() === state.color.toLowerCase()));
+  }
+  function setColor(c){
+    state.color = c;
+    colorInput.value = c;
+    if (state.tool !== 'brush') setTool('brush');
+    syncSwatches();
+  }
+  colorInput.addEventListener('input', () => {
+    setColor(colorInput.value);
+  });
+
+  function setSize(v){
+    state.size = v;
+    sizeVal.textContent = v + ' px';
+  }
+  sizeInput.addEventListener('input', () => { setSize(parseInt(sizeInput.value, 10)); scheduleSave(); });
+  setSize(state.size);
+
+  function setBrushOpacity(o, fromSlider){
+    brushOpacity = clamp(o, 0.1, 1);
+    if (!fromSlider) brushOpacityInput.value = Math.round(brushOpacity * 100);
+    brushOpacityVal.textContent = Math.round(brushOpacity * 100) + ' %';
+  }
+  brushOpacityInput.addEventListener('input', () => {
+    setBrushOpacity(parseInt(brushOpacityInput.value, 10) / 100, true);
+    scheduleSave();
+  });
+
+  function setPressure(on){
+    state.pressure = !!on;
+    pressureBtn.classList.toggle('active', state.pressure);
+  }
+  pressureBtn.addEventListener('click', () => { setPressure(!state.pressure); scheduleSave(); });
+
+  function setBg(bg){
+    state.bg = bg;
+    frame.classList.remove('bg-transparent','bg-white','bg-black');
+    frame.classList.add('bg-' + bg);
+    Object.keys(bgBtns).forEach(k => bgBtns[k].classList.toggle('active', k === bg));
+  }
+  bgBtns.transparent.addEventListener('click', () => { setBg('transparent'); scheduleSave(); });
+  bgBtns.white.addEventListener('click', () => { setBg('white'); scheduleSave(); });
+  bgBtns.black.addEventListener('click', () => { setBg('black'); scheduleSave(); });
+
+  undoBtn.addEventListener('click', () => restore(undoStack, redoStack));
+  redoBtn.addEventListener('click', () => restore(redoStack, undoStack));
+
+  clearBtn.addEventListener('click', () => {
+    if (!confirm('¿Borrar todo el dibujo? La imagen de referencia no se toca.')) return;
+    snapshot();
+    ctx.clearRect(0, 0, W, H);
+    scheduleSave();
+  });
+
+  newBtn.addEventListener('click', () => {
+    if (!confirm('Empezar de cero borra tu dibujo, la referencia y la sesión guardada. ¿Seguro?')) return;
+    ctx.clearRect(0, 0, W, H);
+    undoStack = []; redoStack = []; refreshHistoryButtons();
+    removeReference();
+    setRefOpacity(1);
+    setBrushOpacity(1);
+    setPressure(false);
+    resetView();
+    try{ localStorage.removeItem(KEY); }catch(e){}
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){
+      e.preventDefault();
+      if (e.shiftKey) restore(redoStack, undoStack);
+      else restore(undoStack, redoStack);
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){
+      e.preventDefault();
+      restore(redoStack, undoStack);
+    }
+    if (!e.ctrlKey && !e.metaKey && !e.altKey){
+      const el = document.activeElement, tag = (el && el.tagName) || '';
+      if (tag === 'INPUT' || tag === 'SELECT') return;
+      const k = e.key.toLowerCase();
+      if (k === 'b') setTool('brush');
+      if (k === 'e') setTool('eraser');
+      if (k === 'i') eyedropperBtn.click();
+      if (k === '0') resetView();
+    }
+  });
+
+  // ---------- Guardar / recuperar sesión (localStorage) ----------
+  let saveTimer = null;
+  function scheduleSave(){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveSession, 700);
+  }
+  function saveSessionNow(){ clearTimeout(saveTimer); saveSession(); }
+
+  function saveSession(){
+    let draw = '';
+    try{ draw = canvas.toDataURL('image/png'); }catch(e){}
+    const base = {
+      v: 2, W: W, H: H,
+      bg: state.bg,
+      tool: (state.tool === 'eyedropper') ? 'brush' : state.tool,
+      color: state.color, size: state.size,
+      brushOpacity: brushOpacity, pressure: state.pressure,
+      resizeMode: resizeMode,
+      refOpacity: refOpacity,
+      refX: refX, refY: refY, refScale: refScale,
+      refRotation: refRotation, refFlipH: refFlipH, refFlipV: refFlipV,
+      refOnTop: state.refOnTop, refHiddenByButton: state.refHiddenByButton,
+      sketchMethod: sketchMethod, sketchAmount: sketchAmount,
+      sketchWeight: sketchWeight, sketchApplyOpacity: sketchApplyOpacity,
+      at: Date.now()
+    };
+    const attempts = [
+      () => JSON.stringify(Object.assign({}, base, { ref: refStore, draw: draw })),
+      () => JSON.stringify(Object.assign({}, base, { ref: null, draw: draw })),
+      () => JSON.stringify(Object.assign({}, base, { ref: null, draw: '' }))
+    ];
+    for (const build of attempts){
+      try{ localStorage.setItem(KEY, build()); return; }catch(e){}
+    }
+  }
+
+  function loadSession(){
+    let raw;
+    try{ raw = localStorage.getItem(KEY); }catch(e){ return false; }
+    if (!raw) return false;
+    let p;
+    try{ p = JSON.parse(raw); }catch(e){ return false; }
+    if (!p || p.v !== 2) return false;
+
+    W = clamp(p.W | 0, 64, MAX_SIDE) || 1080;
+    H = clamp(p.H | 0, 64, MAX_SIDE) || 1920;
+    canvas.width = W; canvas.height = H;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    recomputeHistoryLimit();
+    sizeSub.textContent = 'Lienzo ' + W + ' × ' + H + ' · exporta en resolución real';
+
+    setBg(p.bg || 'transparent');
+    if (typeof p.color === 'string'){ state.color = p.color; colorInput.value = p.color; }
+    if (p.size){ sizeInput.value = p.size; setSize(clamp(parseInt(p.size, 10) || 6, 1, 120)); }
+    if (typeof p.brushOpacity === 'number') setBrushOpacity(p.brushOpacity);
+    setPressure(!!p.pressure);
+    resizeMode = p.resizeMode === 'keep' ? 'keep' : 'scale';
+    resizeModeSelect.value = resizeMode;
+    syncSwatches();
+
+    refX = p.refX || 0;
+    refY = p.refY || 0;
+    refScale = clamp(p.refScale || 1, 0.1, 10);
+    refRotation = wrap180(p.refRotation || 0);
+    refFlipH = !!p.refFlipH; refFlipV = !!p.refFlipV;
+    refOpacity = (typeof p.refOpacity === 'number') ? clamp(p.refOpacity, 0.05, 1) : 1;
+    state.refOnTop = !!p.refOnTop;
+    state.refHiddenByButton = !!p.refHiddenByButton;
+
+    if (p.sketchMethod === 'lapiz' || p.sketchMethod === 'contorno') setSketchMethod(p.sketchMethod);
+    if (p.sketchAmount){ sketchAmount = clamp(p.sketchAmount | 0, 1, 100); sketchAmountInput.value = sketchAmount; sketchAmountVal.textContent = sketchAmount; }
+    if (p.sketchWeight){ sketchWeight = clamp(p.sketchWeight | 0, 1, 4); sketchWeightInput.value = sketchWeight; sketchWeightVal.textContent = sketchWeight + ' px'; }
+    if (typeof p.sketchApplyOpacity === 'number'){ sketchApplyOpacity = clamp(p.sketchApplyOpacity, 0.1, 1); sketchApplyInput.value = Math.round(sketchApplyOpacity * 100); sketchApplyVal.textContent = Math.round(sketchApplyOpacity * 100) + ' %'; }
+
+    refScaleInput.value = Math.round(refScale * 100);
+    refScaleVal.textContent = Math.round(refScale * 100) + ' %';
+    refOpacityInput.value = Math.round(refOpacity * 100);
+    refOpacityVal.textContent = Math.round(refOpacity * 100) + ' %';
+    refRotInput.value = refRotation;
+    refRotVal.textContent = Math.round(refRotation) + '°';
+    flipHBtn.classList.toggle('active', refFlipH);
+    flipVBtn.classList.toggle('active', refFlipV);
+    refOnTopBtn.classList.toggle('active', state.refOnTop);
+    refOnTopBtn.textContent = state.refOnTop ? '⬇️ Poner referencia debajo' : '⬆️ Poner referencia encima';
+    frame.classList.toggle('ref-on-top', state.refOnTop);
+
+    let pending = 0;
+    const finish = () => {
+      syncFormatSelect();
+      applyRefTransform();
+      updateRefVisibility();
+      applyView();
+      fitFrame();
+      requestAnimationFrame(fitFrame);
+    };
+
+    if (p.draw){
+      pending++;
+      const di = new Image();
+      di.onload = () => { ctx.clearRect(0, 0, W, H); ctx.drawImage(di, 0, 0, W, H); if (--pending === 0) finish(); };
+      di.onerror = () => { if (--pending === 0) finish(); };
+      di.src = p.draw;
+    }
+    if (p.ref){
+      pending++;
+      refStore = p.ref;
+      refImg.onload = () => {
+        state.hasRef = true;
+        refImg.hidden = false;
+        setRefControlsEnabled(true);
+        if (--pending === 0) finish();
+      };
+      refImg.onerror = () => { refStore = null; if (--pending === 0) finish(); };
+      refImg.src = p.ref;
+    }
+    if (pending === 0) finish();
+    return true;
+  }
+
+  window.addEventListener('pagehide', saveSessionNow);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) saveSessionNow(); });
+
+  // ---------- Exportar ----------
+  saveBtn.addEventListener('click', () => {
+    const out = document.createElement('canvas');
+    out.width = W; out.height = H;
+    const octx = out.getContext('2d');
+
+    if (state.bg === 'white' || state.bg === 'black'){
+      octx.fillStyle = (state.bg === 'white') ? '#ffffff' : '#000000';
+      octx.fillRect(0, 0, W, H);
+    }
+    octx.drawImage(canvas, 0, 0);   // solo la capa de dibujo, nunca la referencia
+
+    out.toBlob((blob) => {
+      const a = document.createElement('a');
+      const stamp = new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'portada-' + W + 'x' + H + '-' + stamp + '.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }, 'image/png');
+  });
+
+  // ---------- init ----------
+  setBg('transparent');
+  setRefControlsEnabled(false);
+  const restored = loadSession();
+  if (!restored){
+    syncFormatSelect();
+    updateRefVisibility();
+    applyView();
+    fitFrame();
+    requestAnimationFrame(fitFrame);
+  }
+  refreshHistoryButtons();
+})();
+</script>
+</body>
+</html>
