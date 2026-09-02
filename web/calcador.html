@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Calcador de portadas — CurisFandom</title>
+<title>Dibujar Curis — CurisFandom</title>
 <meta name="description" content="Herramienta gratis para calcar poses y referencias y dibujar portadas originales (9:16, 4:5, 1:1, 16:9 y a medida). Sin cuenta, sin instalar: todo pasa en tu navegador.">
 <meta name="theme-color" content="#0d0f13">
 <link rel="canonical" href="https://curisfandom.onrender.com/calcador.html">
 <meta name="google-adsense-account" content="ca-pub-3413374034507030">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3413374034507030" crossorigin="anonymous"></script>
 <meta property="og:type" content="website">
-<meta property="og:title" content="Calcador de portadas — CurisFandom">
+<meta property="og:title" content="Dibujar Curis — CurisFandom">
 <meta property="og:description" content="Calcá poses y referencias y dibujá portadas originales en el navegador. Gratis, sin cuenta.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%230d0f13'/%3E%3Cpath d='M25 72 L60 24 a10 10 0 0 1 16 12 L41 84 L20 90 Z' fill='none' stroke='%235b8cff' stroke-width='7' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style>
@@ -335,6 +335,31 @@
   }
   #frame.show-brush #brushCursor{opacity:1}
 
+  /* Guía que aparece la primera vez que entrás a Dibujar Curis */
+  #cgOverlay{
+    position:fixed; inset:0; z-index:50;
+    background:rgba(6,8,12,.74);
+    display:none;
+    align-items:center; justify-content:center;
+    padding:16px;
+  }
+  #cgOverlay.show{display:flex}
+  #cgBox{
+    background:var(--bg-1);
+    border:1px solid var(--line);
+    border-radius:14px;
+    max-width:520px; width:100%;
+    max-height:88vh; overflow-y:auto;
+    padding:22px 22px 18px;
+  }
+  #cgBox h2{font-size:17px;margin-bottom:3px}
+  #cgBox .cg-sub{color:var(--text-dim);font-size:12px;margin-bottom:14px}
+  #cgBox h3{font-size:13px;margin:14px 0 4px;color:var(--accent)}
+  #cgBox p,#cgBox li{font-size:12.5px;line-height:1.55;color:var(--text)}
+  #cgBox ul{margin:2px 0 0 18px}
+  #cgBox .cg-actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  #cgBox .cg-actions>*{flex:1;min-width:150px;justify-content:center;text-align:center}
+
   @media (max-width:720px){
     body{flex-direction:column}
     #panel{
@@ -353,10 +378,11 @@
 
 <aside id="panel">
   <a href="index.html" style="display:inline-block;margin-bottom:10px;color:var(--accent);text-decoration:none;font-size:13px">← Volver a CurisFandom</a>
-  <h1>Calcador de portadas<span id="sizeSub">Lienzo 1080 × 1920 · exporta en resolución real</span></h1>
+  <h1>Dibujar Curis<span id="sizeSub">Lienzo 1080 × 1920 · exporta en resolución real</span></h1>
 
   <div class="group">
     <div class="hint">Herramienta de CurisFandom para hacer Curis <b>originales</b>: calcá una pose o foto propia, dibujá encima y exportá el PNG. Después subilo en <a href="subir.html" style="color:var(--accent)">Subir tu Curis</a>.</div>
+    <button id="cgReopen">👋 Cómo dibujar Curis (guía rápida)</button>
   </div>
 
   <div class="group">
@@ -365,7 +391,7 @@
     <a class="btn" href="calificar.html">⭐ Calificar Curis</a>
     <a class="btn" href="ranking.html">🏆 Ranking</a>
     <a class="btn" href="subir.html">📤 Subir tu Curis</a>
-    <a class="btn" href="guia-dibujar.html">📖 Guía: cómo funciona el calcador</a>
+    <a class="btn" href="guia-dibujar.html">📖 Guía: cómo dibujar Curis</a>
   </div>
 
   <div class="group">
@@ -539,6 +565,75 @@
     <div id="brushCursor" aria-hidden="true"></div>
   </div>
 </main>
+
+<div id="cgOverlay" role="dialog" aria-modal="true" aria-labelledby="cgTitle">
+  <div id="cgBox">
+    <h2 id="cgTitle">👋 Cómo dibujar Curis</h2>
+    <div class="cg-sub">Guía rápida — se muestra solo la primera vez.</div>
+    <p>Esta herramienta sirve para <b>calcar</b> una pose o foto propia y dibujar
+    tu Curi original encima. Todo pasa en tu navegador y se guarda solo en este
+    dispositivo.</p>
+
+    <h3>1 · Elegí el formato</h3>
+    <p>En <b>Formato del lienzo</b> elegís la medida (9:16, 4:5, 1:1…) o una a medida.</p>
+
+    <h3>2 · Subí una referencia</h3>
+    <ul>
+      <li><b>📂 Subir imagen de referencia</b> y acomodala con <b>🖐️ Mover / escalar</b>
+      (arrastrás sobre el lienzo; rueda del mouse para agrandar).</li>
+      <li>Bajá la <b>opacidad de la referencia</b> para que tu trazo resalte.</li>
+      <li>Mantené <b>Espacio</b> para espiar un momento solo tu dibujo.</li>
+    </ul>
+
+    <h3>3 · Boceto automático (opcional)</h3>
+    <p><b>✨ Generar boceto</b> traza las líneas de la referencia sobre el lienzo.
+    Bajá "Cantidad de línea" si sale muy cargado. Se deshace con <b>Ctrl+Z</b>.</p>
+
+    <h3>4 · Dibujá</h3>
+    <p><b>✏️ Pincel</b>, <b>🧽 Borrador</b> y <b>💧 Cuentagotas</b>. Al mover el
+    <b>Grosor</b> ves un círculo con el tamaño real del pincel.</p>
+
+    <h3>5 · Exportá</h3>
+    <p><b>💾 Guardar como PNG</b> descarga solo tu dibujo. Después subilo en
+    <a href="subir.html" style="color:var(--accent)">Subir tu Curis</a>.</p>
+
+    <div class="cg-actions">
+      <a class="btn" href="guia-dibujar.html">📖 Guía completa</a>
+      <button id="cgClose" class="active">Empezar a dibujar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // Guía de bienvenida: se abre sola la primera visita (flag en localStorage);
+  // después solo con el botón "guía rápida" del panel.
+  var GKEY = 'calcador:guideSeen:v1';
+  var overlay = document.getElementById('cgOverlay');
+  var closeBtn = document.getElementById('cgClose');
+  var reopenBtn = document.getElementById('cgReopen');
+  function openGuide(){ overlay.classList.add('show'); }
+  function closeGuide(){
+    overlay.classList.remove('show');
+    try{ localStorage.setItem(GKEY, '1'); }catch(e){}
+  }
+  closeBtn.addEventListener('click', closeGuide);
+  overlay.addEventListener('click', function(e){ if (e.target === overlay) closeGuide(); });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && overlay.classList.contains('show')) closeGuide();
+  });
+  if (reopenBtn) reopenBtn.addEventListener('click', openGuide);
+  var seen;
+  try{ seen = localStorage.getItem(GKEY); }catch(e){ seen = '1'; }
+  if (!seen){
+    openGuide();
+    // marca "ya vista" apenas se muestra, así en la 2.ª visita no vuelve a
+    // salir aunque el usuario cierre la pestaña sin tocar el botón.
+    try{ localStorage.setItem(GKEY, '1'); }catch(e){}
+  }
+})();
+</script>
 
 <script>
 (function(){
