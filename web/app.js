@@ -407,8 +407,8 @@
         if ($('starsCapLabel')) $('starsCapLabel').textContent = data.cap;
     }
 
-    // Cuenta regresiva de anuncio reutilizable (subida y extensión de límite).
-    function showAdCountdown(seconds, hintText, onComplete) {
+    // Cuenta regresiva / espera reutilizable (subida y extensión de límite).
+    function showWaitCountdown(seconds, hintText, onComplete) {
         let t = seconds;
         if ($('adCountdown')) $('adCountdown').textContent = t;
         if ($('adHint') && hintText) $('adHint').textContent = hintText;
@@ -431,7 +431,7 @@
             if ($('starLimitAdBtn')) $('starLimitAdBtn').style.display = 'none';
         } else {
             if ($('starLimitTitle')) $('starLimitTitle').textContent = 'Llegaste al límite de hoy';
-            if ($('starLimitText')) $('starLimitText').textContent = `Ya diste ${CONFIG.starsCapBase} estrellas hoy. Mirá un anuncio de 30 segundos para subir tu límite a ${CONFIG.starsCapExtended} estrellas.`;
+            if ($('starLimitText')) $('starLimitText').textContent = `Ya diste ${CONFIG.starsCapBase} estrellas hoy. Esperá ${CONFIG.adSeconds} segundos para ampliar tu límite del día a ${CONFIG.starsCapExtended} estrellas.`;
             if ($('starLimitAdBtn')) $('starLimitAdBtn').style.display = 'block';
         }
         openModal('starLimitModal');
@@ -439,7 +439,7 @@
 
     function extendStarsCap() {
         closeAll();
-        showAdCountdown(CONFIG.adSeconds, `Mirando el anuncio para subir tu límite a ${CONFIG.starsCapExtended} estrellas...`, () => {
+        showWaitCountdown(CONFIG.adSeconds, `Ampliando tu límite del día a ${CONFIG.starsCapExtended} estrellas...`, () => {
             api('/ratings/extend', { method: 'POST' })
                 .then(res => { closeAll(); updateStarsTodayUI(res.starsToday); })
                 .catch(() => { closeAll(); alert('No se pudo extender el límite. Probá de nuevo.'); });
@@ -1109,10 +1109,10 @@
         });
     }
 
-    // Publicar pasa siempre por un anuncio de 30s. Hay una chance (no
-    // visible para el usuario) del 10% de necesitar un anuncio adicional
-    // antes de publicar; se avisa con un mensaje honesto (no un error
-    // falso) para no engañar a quien está subiendo el Curis.
+    // Publicar pasa siempre por una espera breve de ~30s (cola de revisión).
+    // Hay una chance (no visible para el usuario) del 10% de necesitar unos
+    // segundos más; se avisa con un mensaje honesto para no engañar a quien
+    // está subiendo el Curis.
     function beginPublish() {
         if (!requireAuth('Necesitas iniciar sesión para subir tu Curis.')) return;
         const img = $('previewImg');
@@ -1125,7 +1125,7 @@
     }
 
     function runUploadAd() {
-        showAdCountdown(CONFIG.adSeconds, 'Cargando anuncio antes de publicar tu Curis...', resolveUploadAd);
+        showWaitCountdown(CONFIG.adSeconds, 'Preparando la publicación de tu Curis...', resolveUploadAd);
     }
 
     function resolveUploadAd() {

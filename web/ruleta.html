@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-adsense-account" content="ca-pub-3413374034507030">
-    <meta name="description" content="La Ruleta de estrellas de CurisFandom: giro gratis cada 20 horas, premios de 1 a 50 estrellas y un giro extra mirando un anuncio de 30 segundos.">
+    <meta name="description" content="La Ruleta de estrellas de CurisFandom: giro gratis cada 20 horas, premios de 1 a 50 estrellas y un giro extra tras una espera de 30 segundos.">
     <link rel="canonical" href="https://curisfandom.onrender.com/ruleta.html">
     <title>Ruleta de estrellas</title>
     <link rel="stylesheet" href="styles.css">
@@ -58,7 +58,7 @@
             <div class="ruleta-wrap">
                 <p class="content-lead" style="margin-bottom:0">Girá la ruleta y ganá
                 estrellas. Tenés <strong>un giro gratis cada 20 horas</strong>. Si querés
-                seguir girando, mirá un anuncio de 30 segundos y se te habilita otro giro.</p>
+                seguir girando, esperá 30 segundos y se te habilita otro giro.</p>
 
                 <div class="ruleta-balance">⭐ <span id="ruletaBal">0</span> estrellas de la ruleta</div>
 
@@ -87,7 +87,7 @@
 
     <div class="ruleta-ad-overlay" id="ruletaAdOverlay">
         <div class="ruleta-ad-box">
-            <p>Mirando un anuncio para habilitar otro giro…</p>
+            <p>Esperá un momento para habilitar otro giro…</p>
             <div class="count" id="ruletaAdCount">30</div>
             <p class="ruleta-note" style="margin:0">No cierres esta ventana.</p>
         </div>
@@ -199,7 +199,7 @@
 
         var spinning = false;
         var currentRot = 0;
-        var adCredit = 0;          // giros extra ganados por anuncio (en memoria)
+        var adCredit = 0;          // giros extra habilitados tras la espera (en memoria)
         var statusTimer = null;
 
         function lsGet(k, d) { try { return localStorage.getItem(k); } catch (e) { return d; } }
@@ -276,10 +276,10 @@
                 spinBtn.textContent = 'Girar';
                 statusEl.textContent = freeReady()
                     ? 'Tenés un giro gratis disponible.'
-                    : 'Giro extra habilitado por el anuncio.';
+                    : 'Giro extra habilitado.';
             } else {
                 spinBtn.disabled = false;
-                spinBtn.textContent = '🎬 Ver anuncio de 30 s para girar de nuevo';
+                spinBtn.textContent = '⏳ Esperar 30 s para girar de nuevo';
                 var left = nextFreeAt() - Date.now();
                 statusEl.textContent = 'Próximo giro gratis en ' + fmtCountdown(left) + '.';
                 statusTimer = setTimeout(renderStatus, 30000);
@@ -290,7 +290,7 @@
         function doSpin() {
             if (spinning) return;
             var usedFree = freeReady();
-            if (!usedFree && adCredit <= 0) { runAd(); return; }
+            if (!usedFree && adCredit <= 0) { runWait(); return; }
 
             spinning = true;
             spinBtn.disabled = true;
@@ -320,8 +320,8 @@
             }, SPIN_MS + 60);
         }
 
-        // ---------- anuncio de 30 s ----------
-        function runAd() {
+        // ---------- espera de 30 s para habilitar otro giro ----------
+        function runWait() {
             var t = 30;
             adCountEl.textContent = t;
             adOverlay.classList.add('show');
