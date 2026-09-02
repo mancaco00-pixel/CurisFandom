@@ -6,6 +6,7 @@
 <title>Calcador de portadas — CurisFandom</title>
 <meta name="description" content="Herramienta gratis para calcar poses y referencias y dibujar portadas originales (9:16, 4:5, 1:1, 16:9 y a medida). Sin cuenta, sin instalar: todo pasa en tu navegador.">
 <meta name="theme-color" content="#0d0f13">
+<link rel="canonical" href="https://curisfandom.onrender.com/calcador.html">
 <meta name="google-adsense-account" content="ca-pub-3413374034507030">
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3413374034507030" crossorigin="anonymous"></script>
 <meta property="og:type" content="website">
@@ -292,6 +293,48 @@
   }
   #peekBtn[hidden]{display:none}
 
+  /* Círculo que muestra el grosor real del pincel sobre el lienzo.
+     #sizePreview aparece al mover el slider de grosor; #brushCursor sigue
+     al puntero mientras dibujás para que se vea el tamaño exacto. */
+  #sizePreview{
+    position:absolute;
+    left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    border:2px solid var(--accent);
+    background:rgba(91,140,255,.13);
+    border-radius:50%;
+    pointer-events:none;
+    z-index:6;
+    opacity:0;
+    transition:opacity .2s ease;
+  }
+  #sizePreview.show{opacity:1}
+  #sizePreview span{
+    position:absolute;
+    left:50%;bottom:100%;
+    transform:translateX(-50%);
+    margin-bottom:7px;
+    font-size:11px;
+    color:var(--text);
+    background:rgba(13,15,19,.92);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:1px 7px;
+    white-space:nowrap;
+  }
+  #brushCursor{
+    position:absolute;
+    left:0;top:0;
+    border:1.5px solid rgba(255,255,255,.92);
+    box-shadow:0 0 0 1.5px rgba(0,0,0,.45);
+    border-radius:50%;
+    pointer-events:none;
+    z-index:6;
+    opacity:0;
+    transform:translate(-50%,-50%);
+  }
+  #frame.show-brush #brushCursor{opacity:1}
+
   @media (max-width:720px){
     body{flex-direction:column}
     #panel{
@@ -314,6 +357,29 @@
 
   <div class="group">
     <div class="hint">Herramienta de CurisFandom para hacer Curis <b>originales</b>: calcá una pose o foto propia, dibujá encima y exportá el PNG. Después subilo en <a href="subir.html" style="color:var(--accent)">Subir tu Curis</a>.</div>
+  </div>
+
+  <div class="group">
+    <div class="label">Ir a CurisFandom</div>
+    <a class="btn" href="index.html">🏠 Inicio de CurisFandom</a>
+    <a class="btn" href="calificar.html">⭐ Calificar Curis</a>
+    <a class="btn" href="ranking.html">🏆 Ranking</a>
+    <a class="btn" href="subir.html">📤 Subir tu Curis</a>
+    <a class="btn" href="guia-dibujar.html">📖 Guía: cómo funciona el calcador</a>
+  </div>
+
+  <div class="group">
+    <div class="label">Subir tu Curis calcada</div>
+    <div class="hint" style="border:1px dashed var(--line);border-radius:9px;padding:10px 11px">
+      <b>🚧 En desarrollo.</b> Pronto vas a poder mandar tu dibujo directo a la
+      galería desde acá, sin bajarlo y volver a subirlo a mano. El Curis va a
+      quedar publicado a nombre de quien lo hizo, con sus derechos de autor,
+      a través de la cuenta de CurisFandom.
+      <br><br>
+      Por ahora: tocá <b>💾 Guardar como PNG</b> (abajo de todo) y subilo en
+      <a href="subir.html" style="color:var(--accent)">Subir tu Curis</a>.
+    </div>
+    <button id="devUploadBtn" disabled title="Disponible próximamente">⬆️ Subir a la galería (próximamente)</button>
   </div>
 
   <div class="group">
@@ -469,6 +535,8 @@
     <img id="refImg" alt="referencia" hidden>
     <canvas id="drawCanvas" width="1080" height="1920"></canvas>
     <button id="peekBtn">👁️ Referencia</button>
+    <div id="sizePreview" aria-hidden="true"><span></span></div>
+    <div id="brushCursor" aria-hidden="true"></div>
   </div>
 </main>
 
@@ -1214,6 +1282,39 @@
     return out;
   }
 
+  // Desenfoque gaussiano separable sobre un canal en escala de grises. Se usa
+  // para sacarle el ruido a la foto ANTES de detectar bordes -- sin esto el
+  // contorno salía "sucio" en fotos con textura (piel, pasto, JPG comprimido).
+  function blurGray(src, w, h, radius){
+    if (radius < 1) return src;
+    const sigma = radius / 2;
+    const k = new Float32Array(radius * 2 + 1);
+    let ksum = 0;
+    for (let i = -radius; i <= radius; i++){
+      const v = Math.exp(-(i * i) / (2 * sigma * sigma));
+      k[i + radius] = v; ksum += v;
+    }
+    for (let i = 0; i < k.length; i++) k[i] /= ksum;
+    const tmp = new Float32Array(w * h);
+    const out = new Float32Array(w * h);
+    for (let y = 0; y < h; y++){
+      const row = y * w;
+      for (let x = 0; x < w; x++){
+        let acc = 0;
+        for (let i = -radius; i <= radius; i++) acc += src[row + clamp(x + i, 0, w - 1)] * k[i + radius];
+        tmp[row + x] = acc;
+      }
+    }
+    for (let y = 0; y < h; y++){
+      for (let x = 0; x < w; x++){
+        let acc = 0;
+        for (let i = -radius; i <= radius; i++) acc += tmp[clamp(y + i, 0, h - 1) * w + x] * k[i + radius];
+        out[y * w + x] = acc;
+      }
+    }
+    return out;
+  }
+
   function generateSketch(){
     if (!state.hasRef) return;
     const w = W, h = H, n = w * h;
@@ -1237,20 +1338,55 @@
     const LR = 34, LG = 34, LB = 34;        // color del trazo (gris oscuro)
 
     if (sketchMethod === 'contorno'){
+      // 1) suavizado previo: saca el ruido de la foto para que el contorno no
+      //    salga lleno de puntitos. El radio se adapta al tamaño del lienzo.
+      const blurR = clamp(Math.round(Math.min(w, h) / 700), 1, 3);
+      const gs = blurGray(g, w, h, blurR);
+
+      // 2) Sobel sobre la versión sin ruido.
       let strength = new Float32Array(n);
+      let maxS = 0;
       for (let y = 1; y < h - 1; y++){
         for (let x = 1; x < w - 1; x++){
           const i = y * w + x;
-          const gx = -g[i-w-1] - 2*g[i-1] - g[i+w-1] + g[i-w+1] + 2*g[i+1] + g[i+w+1];
-          const gy = -g[i-w-1] - 2*g[i-w] - g[i-w+1] + g[i+w-1] + 2*g[i+w] + g[i+w+1];
-          strength[i] = Math.hypot(gx, gy);
+          const gx = -gs[i-w-1] - 2*gs[i-1] - gs[i+w-1] + gs[i-w+1] + 2*gs[i+1] + gs[i+w+1];
+          const gy = -gs[i-w-1] - 2*gs[i-w] - gs[i-w+1] + gs[i+w-1] + 2*gs[i+w] + gs[i+w+1];
+          const m = Math.hypot(gx, gy);
+          strength[i] = m;
+          if (m > maxS) maxS = m;
         }
       }
+
+      // 3) umbral ADAPTATIVO: en vez de un número fijo, nos quedamos con el
+      //    tramo de bordes más marcados. "Cantidad de línea" decide qué
+      //    porcentaje entra (~2 %..30 %), así el resultado es parejo entre
+      //    fotos claras y oscuras.
+      const keepFrac = 0.02 + (sketchAmount / 100) * 0.28;
+      const BINS = 256;
+      const hist = new Int32Array(BINS);
+      const toBin = maxS > 0 ? (BINS - 1) / maxS : 0;
+      for (let i = 0; i < n; i++) hist[(strength[i] * toBin) | 0]++;
+      let seen = 0, cutBin = 1;
+      const targetPx = n * keepFrac;
+      for (let b = BINS - 1; b >= 1; b--){ seen += hist[b]; if (seen >= targetPx){ cutBin = b; break; } }
+      const t = Math.max(1, cutBin / toBin);
+
+      // 4) grosor: dilatar para líneas gruesas; con grosor 1, afinar quedándose
+      //    con la cresta (máximo local) para que la línea no quede empastada.
+      const thin = sketchWeight <= 1;
       for (let k = 1; k < sketchWeight; k++) strength = dilateMax(strength, w, h);
-      const t = 92 - (sketchAmount / 100) * 80;   // más cantidad => menos umbral
+
+      const soft = t * 0.6 + 1;
       for (let i = 0; i < n; i++){
-        const m = strength[i];
-        const a = m <= t ? 0 : clamp((m - t) / (t * 0.9 + 1), 0, 1);
+        let m = strength[i];
+        if (thin && m > t){
+          const up = i >= w        ? strength[i-w] : 0;
+          const dn = i < n - w     ? strength[i+w] : 0;
+          const lf = (i % w)       ? strength[i-1] : 0;
+          const rt = ((i + 1) % w) ? strength[i+1] : 0;
+          if (m < up || m < dn || m < lf || m < rt) m = t;
+        }
+        const a = m <= t ? 0 : clamp((m - t) / soft, 0.12, 1);
         out.data[i*4] = LR; out.data[i*4+1] = LG; out.data[i*4+2] = LB;
         out.data[i*4+3] = Math.round(a * 255);
       }
@@ -1455,11 +1591,51 @@
     setColor(colorInput.value);
   });
 
+  // Vista previa del grosor: traduce el grosor interno (px del lienzo) al
+  // tamaño en pantalla y lo muestra como un círculo, así no se dibuja "a ciegas".
+  const sizePreview  = document.getElementById('sizePreview');
+  const brushCursor  = document.getElementById('brushCursor');
+  const sizePreviewLabel = sizePreview.firstElementChild;
+  let sizePreviewTimer = null;
+
+  function displayScale(){
+    return frame.clientWidth ? (frame.clientWidth / W) : 1;
+  }
+  function screenBrushDiameter(){
+    return Math.max(4, state.size * displayScale());
+  }
+  function flashSizePreview(){
+    const d = screenBrushDiameter();
+    sizePreview.style.width = d + 'px';
+    sizePreview.style.height = d + 'px';
+    sizePreviewLabel.textContent = state.size + ' px';
+    sizePreview.classList.add('show');
+    clearTimeout(sizePreviewTimer);
+    sizePreviewTimer = setTimeout(() => sizePreview.classList.remove('show'), 1100);
+  }
+  function moveBrushCursor(ev){
+    if (state.mode === 'refedit' || state.tool === 'eyedropper' || pinching || viewPanning){
+      frame.classList.remove('show-brush');
+      return;
+    }
+    const r = frame.getBoundingClientRect();
+    const d = screenBrushDiameter();
+    brushCursor.style.width = d + 'px';
+    brushCursor.style.height = d + 'px';
+    brushCursor.style.left = ((ev.clientX - r.left) / viewScale) + 'px';
+    brushCursor.style.top  = ((ev.clientY - r.top)  / viewScale) + 'px';
+    frame.classList.add('show-brush');
+  }
+  canvas.addEventListener('pointermove', moveBrushCursor);
+  canvas.addEventListener('pointerdown', moveBrushCursor);
+  ['pointerleave','pointercancel'].forEach(t =>
+    canvas.addEventListener(t, () => frame.classList.remove('show-brush')));
+
   function setSize(v){
     state.size = v;
     sizeVal.textContent = v + ' px';
   }
-  sizeInput.addEventListener('input', () => { setSize(parseInt(sizeInput.value, 10)); scheduleSave(); });
+  sizeInput.addEventListener('input', () => { setSize(parseInt(sizeInput.value, 10)); flashSizePreview(); scheduleSave(); });
   setSize(state.size);
 
   function setBrushOpacity(o, fromSlider){

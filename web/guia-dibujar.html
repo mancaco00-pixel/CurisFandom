@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-3413374034507030">
+    <meta name="description" content="Guía completa del Calcador de portadas de CurisFandom: qué hace cada botón, cómo calcar una referencia, generar el boceto automático, elegir grosor y color, y exportar tu dibujo en PNG.">
+    <link rel="canonical" href="https://curisfandom.onrender.com/guia-dibujar.html">
+    <title>Guía para dibujar con el Calcador</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3413374034507030"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <header class="top-bar">
+        <a href="index.html" class="logo-mini">
+            <span class="logo-c">C</span>uris<span class="logo-fandom">Fandom</span>
+        </a>
+
+        <div class="user-area" id="userArea">
+            <span class="user-name" id="userName">Invitado</span>
+            <div class="avatar" id="userAvatar">👤</div>
+            <button class="btn-google" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="user-menu" id="userMenu" style="display:none;">
+                <button class="menu-btn" id="myAccountBtn">Mi cuenta</button>
+                <button class="menu-btn" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h1 class="page-title">🎨 Guía para dibujar con el Calcador</h1>
+            <div class="page-header-actions">
+                <a href="calcador.html" class="btn-back-home">Abrir el Calcador →</a>
+            </div>
+        </div>
+
+        <section class="profile-section legal-content">
+            <nav class="content-nav">
+                <a href="como-funciona.html">Cómo funciona</a>
+                <a href="guia.html">Guía para subir</a>
+                <a href="guia-dibujar.html" aria-current="page">Guía de dibujo</a>
+                <a href="faq.html">Preguntas frecuentes</a>
+                <a href="novedades.html">Novedades</a>
+                <a href="galeria.html">Galería</a>
+            </nav>
+
+            <p class="content-lead">El <a href="calcador.html">Calcador de portadas</a> es
+            la herramienta de dibujo de CurisFandom. Sirve para calcar una pose, una foto
+            propia o un boceto y dibujar tu propia portada original arriba, sin instalar
+            nada y sin crear una cuenta: todo pasa en tu navegador y tu trabajo se guarda
+            solo en tu dispositivo. Esta guía recorre la pantalla de arriba a abajo y
+            explica para qué sirve cada botón.</p>
+
+            <h2 id="pantalla">Cómo está organizada la pantalla</h2>
+            <p>Hay dos zonas:</p>
+            <ul>
+                <li><strong>El panel</strong> (a la izquierda en computadora, arriba en
+                celular): todos los controles, agrupados por tema.</li>
+                <li><strong>El lienzo</strong> (a la derecha / abajo): el área cuadriculada
+                donde dibujás. La cuadrícula gris representa el "transparente".</li>
+            </ul>
+            <p>Arriba del panel está el título con el tamaño del lienzo actual (por
+            ejemplo <em>"Lienzo 1080 × 1920 · exporta en resolución real"</em>) y un enlace
+            <strong>← Volver a CurisFandom</strong>.</p>
+
+            <h2 id="ir">Ir a CurisFandom</h2>
+            <p>Atajos para moverte entre la herramienta de dibujo y el resto del sitio:
+            <strong>Inicio</strong>, <strong>Calificar Curis</strong>,
+            <strong>Ranking</strong>, <strong>Subir tu Curis</strong> y el enlace a esta
+            guía.</p>
+
+            <h2 id="subir-calcada">Subir tu Curis calcada</h2>
+            <p>Es una función <strong>en desarrollo</strong>. La idea es que puedas mandar
+            el dibujo directo a la galería desde el Calcador, sin bajarlo y volver a
+            subirlo a mano, y que quede publicado a nombre de quien lo hizo, con sus
+            derechos de autor, a través de la cuenta de CurisFandom. Por ahora el circuito
+            es: <strong>Guardar como PNG</strong> y después subirlo en
+            <a href="subir.html">Subir tu Curis</a>.</p>
+
+            <h2 id="formato">Formato del lienzo</h2>
+            <p>Define el tamaño y la proporción de tu dibujo.</p>
+            <ul>
+                <li><strong>Lista de formatos:</strong> medidas listas para redes
+                (9:16 tipo TikTok/Reels, 4:5 de Instagram, 1:1 cuadrado, 16:9 horizontal,
+                720p de YouTube, etc.).</li>
+                <li><strong>Personalizado…:</strong> abre dos casillas para escribir el
+                ancho y el alto en píxeles (máximo 4096 por lado) y un botón
+                <strong>Aplicar</strong>.</li>
+                <li><strong>Al cambiar de formato:</strong>
+                    <ul>
+                        <li><em>Reescalar el dibujo</em>: lo que ya dibujaste se estira
+                        para ocupar el nuevo tamaño.</li>
+                        <li><em>Mantener a tamaño real</em>: tu dibujo queda centrado sin
+                        deformarse; lo que sobra se recorta y lo que falta se agrega como
+                        lienzo vacío.</li>
+                    </ul>
+                </li>
+            </ul>
+            <p>Si ya empezaste a dibujar, el Calcador te pide confirmación antes de cambiar
+            el formato porque puede modificar el dibujo.</p>
+
+            <h2 id="referencia">Imagen de referencia</h2>
+            <p>La referencia es la imagen que vas a calcar. Nunca se incluye en el PNG
+            final: es solo una guía que ves mientras dibujás.</p>
+            <ul>
+                <li><strong>📂 Subir imagen de referencia:</strong> elegí una foto o dibujo
+                de tu dispositivo. Se coloca centrada, cubriendo el lienzo.</li>
+                <li><strong>❌ Quitar referencia:</strong> la saca del lienzo.</li>
+                <li><strong>👁️ Ocultar / Mostrar referencia:</strong> la esconde sin
+                borrarla, para ver cómo va quedando tu dibujo solo.</li>
+                <li><strong>🖐️ Mover / escalar referencia:</strong> activa el modo de
+                ajuste. Con este modo encendido, <strong>arrastrás sobre el lienzo</strong>
+                para reubicar la referencia y usás la <strong>rueda del mouse</strong> para
+                acercarla o alejarla. Elegir cualquier herramienta de dibujo sale de este
+                modo.</li>
+                <li><strong>⬆️ Poner referencia encima / debajo:</strong> cambia si la
+                referencia se ve por encima o por debajo de tu trazo. "Encima" con
+                opacidad baja sirve para repasar líneas exactas.</li>
+                <li><strong>Opacidad de la referencia:</strong> qué tan transparente se ve.
+                Bajala para que tu dibujo resalte sobre ella.</li>
+                <li><strong>Tamaño de la referencia:</strong> escala del 10 % al 500 %.</li>
+                <li><strong>Rotación de la referencia:</strong> un deslizador de -180° a
+                180°, más los botones <strong>⟲ 90°</strong> y <strong>90° ⟳</strong> para
+                girar de a cuartos.</li>
+                <li><strong>⇋ Voltear H / ⇅ Voltear V:</strong> espeja la referencia en
+                horizontal o vertical.</li>
+                <li><strong>↺ Reajustar referencia:</strong> vuelve la referencia a su
+                posición, tamaño y rotación originales.</li>
+            </ul>
+            <p><strong>Truco:</strong> mantené apretada la tecla <kbd>Espacio</kbd> o
+            <kbd>T</kbd> para "espiar" un instante solo tu dibujo, sin la referencia.</p>
+
+            <h2 id="boceto">Boceto automático</h2>
+            <p>Genera las líneas de la referencia directamente sobre tu lienzo, para no
+            tener que trazar todo el contorno a mano. Después vos pintás y agregás el
+            texto. Todo el proceso ocurre en tu navegador, no se sube la imagen a ningún
+            lado.</p>
+            <ul>
+                <li><strong>Contorno / Lápiz:</strong> dos estilos. <em>Contorno</em>
+                detecta los bordes y los dibuja como líneas limpias; <em>Lápiz</em> imita
+                un sombreado a lápiz de toda la imagen.</li>
+                <li><strong>Cantidad de línea:</strong> cuánto detalle se traza. Más
+                cantidad = más líneas (y más ruido); menos cantidad = solo los bordes más
+                marcados.</li>
+                <li><strong>Grosor de línea:</strong> de 1 a 4 píxeles. En 1 las líneas
+                salen más finas y afiladas; subilo si querés un trazo más grueso.</li>
+                <li><strong>Opacidad al aplicar:</strong> qué tan fuerte queda el boceto
+                sobre el lienzo. Un valor medio-bajo deja una guía suave para repasar.</li>
+                <li><strong>✨ Generar boceto sobre el lienzo:</strong> aplica el trazado.
+                Se puede deshacer con <kbd>Ctrl</kbd>+<kbd>Z</kbd>.</li>
+            </ul>
+            <p>Funciona mejor con fotos de fondo simple y buen contraste. Si el resultado
+            sale muy cargado, bajá la <em>Cantidad de línea</em> y volvé a generar.</p>
+
+            <h2 id="herramienta">Herramienta</h2>
+            <ul>
+                <li><strong>✏️ Pincel:</strong> dibuja con el color elegido.</li>
+                <li><strong>🧽 Borrador:</strong> borra dejando el fondo transparente (no
+                pinta de blanco).</li>
+                <li><strong>💧 Cuentagotas:</strong> toma un color del lienzo o de la
+                referencia. Después de tomarlo vuelve solo al pincel.</li>
+            </ul>
+
+            <h2 id="color">Color</h2>
+            <p>El cuadrado grande abre el selector de color completo de tu sistema. Al lado
+            hay una grilla de <strong>colores rápidos</strong>; el que estás usando queda
+            marcado.</p>
+
+            <h2 id="grosor">Grosor y opacidad del pincel</h2>
+            <ul>
+                <li><strong>Grosor:</strong> de 1 a 120 píxeles. Al mover el deslizador
+                aparece un <strong>círculo en el lienzo que muestra el tamaño real</strong>
+                del pincel, así no dibujás adivinando. Ese mismo círculo sigue al puntero
+                mientras dibujás.</li>
+                <li><strong>Opacidad del pincel:</strong> se aplica al trazo entero, no se
+                acumula donde la línea se cruza consigo misma.</li>
+                <li><strong>🖊️ Presión del lápiz (tableta):</strong> si tenés una tableta o
+                pantalla con lápiz compatible, el grosor sigue la fuerza con la que
+                apretás.</li>
+            </ul>
+
+            <h2 id="fondo">Fondo del dibujo</h2>
+            <p><strong>Transp.</strong> (transparente), <strong>Blanco</strong> o
+            <strong>Negro</strong>. El transparente es el ideal para calcar; el blanco o
+            negro se incluyen en el PNG al exportar.</p>
+
+            <h2 id="vista">Vista (zoom del lienzo)</h2>
+            <p>Acerca o aleja la vista sin cambiar el dibujo (es solo una lupa).</p>
+            <ul>
+                <li><strong>Zoom:</strong> deslizador del 100 % al 800 %.</li>
+                <li><strong>↺ Reajustar vista:</strong> vuelve al 100 %.</li>
+                <li><strong>Atajos:</strong> <kbd>Ctrl</kbd> + rueda del mouse para acercar;
+                dos dedos para pellizcar y mover en pantallas táctiles; botón del medio del
+                mouse para desplazar; la tecla <kbd>0</kbd> reajusta.</li>
+            </ul>
+
+            <h2 id="acciones">Acciones</h2>
+            <ul>
+                <li><strong>↶ Deshacer / ↷ Rehacer:</strong> también con
+                <kbd>Ctrl</kbd>+<kbd>Z</kbd> y <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>
+                (o <kbd>Ctrl</kbd>+<kbd>Y</kbd>).</li>
+                <li><strong>🗑️ Limpiar todo el lienzo:</strong> borra el dibujo pero deja la
+                referencia.</li>
+                <li><strong>🆕 Empezar de cero:</strong> borra el dibujo, la referencia y la
+                sesión guardada.</li>
+            </ul>
+            <p>Tu trabajo se guarda automáticamente en este navegador y se recupera al
+            volver a abrir la página.</p>
+
+            <h2 id="exportar">Exportar</h2>
+            <p><strong>💾 Guardar como PNG</strong> descarga solo tu dibujo (con el fondo
+            elegido) en la resolución real del formato. La imagen de referencia nunca se
+            incluye.</p>
+
+            <h2 id="lienzo-movil">El botón sobre el lienzo</h2>
+            <p>En la esquina del lienzo hay un botón flotante <strong>👁️ Referencia</strong>
+            que oculta o muestra la referencia sin volver al panel; es cómodo en celular.</p>
+
+            <h2 id="atajos">Atajos de teclado</h2>
+            <ul>
+                <li><kbd>B</kbd> pincel · <kbd>E</kbd> borrador · <kbd>I</kbd> cuentagotas</li>
+                <li><kbd>Ctrl</kbd>+<kbd>Z</kbd> deshacer ·
+                <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> rehacer</li>
+                <li><kbd>0</kbd> reajustar la vista</li>
+                <li><kbd>Espacio</kbd> o <kbd>T</kbd> (mantener) espiar solo tu dibujo</li>
+            </ul>
+
+            <h2 id="flujo">Un flujo de trabajo típico</h2>
+            <ol>
+                <li>Elegí el formato (por ejemplo 1080 × 1920 para una portada vertical).</li>
+                <li>Subí tu referencia y acomodala con <em>Mover / escalar</em>.</li>
+                <li>Bajá la opacidad de la referencia al 40-60 %.</li>
+                <li>Opcional: generá el <em>boceto automático</em> con poca cantidad de
+                línea para tener una guía.</li>
+                <li>Dibujá encima con el pincel; usá <kbd>Espacio</kbd> para chequear cómo
+                va sin la referencia.</li>
+                <li>Ocultá la referencia, repasá y pintá.</li>
+                <li><strong>Guardar como PNG</strong> y subilo en
+                <a href="subir.html">Subir tu Curis</a>.</li>
+            </ol>
+            <p>Para consejos sobre qué hace que un Curi puntúe alto una vez publicado, leé
+            la <a href="guia.html">guía para subir un buen Curi</a>.</p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <a href="index.html">Inicio</a><span>·</span>
+        <a href="como-funciona.html">Cómo funciona</a><span>·</span>
+        <a href="galeria.html">Galería</a><span>·</span>
+        <a href="ranking.html">Ranking</a><span>·</span>
+        <a href="guia.html">Guía</a><span>·</span>
+        <a href="faq.html">Preguntas frecuentes</a><span>·</span>
+        <a href="novedades.html">Novedades</a><span>·</span>
+        <a href="calcador.html">Calcador</a><span>·</span>
+        <a href="guia-dibujar.html">Guía de dibujo</a><span>·</span>
+        <a href="mailto:curisfandom@gmail.com?subject=Sugerencia%20para%20CurisFandom">Sugerencias</a><span>·</span>
+        <a href="legal.html">Privacidad y Términos</a>
+    </footer>
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Inicia sesión para continuar</h2>
+            <p id="loginMessage">Necesitas iniciar sesión para poder calificar Curis.</p>
+            <button class="btn-google btn-google-big" id="modalGoogleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="other-methods" style="opacity:.4;pointer-events:none;">
+                <p class="hint">Otros métodos próximamente</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="chooseNameModal">
+        <div class="modal-content">
+            <h2>Elige tu nombre</h2>
+            <p>Este será el nombre que aparecerá cuando subas tus Curis.</p>
+            <input type="text" id="usernameInput" placeholder="Escribe tu nombre de usuario" maxlength="20">
+            <button class="btn-primary" id="saveNameBtn">Guardar nombre</button>
+        </div>
+    </div>
+
+    <div class="modal" id="choosePasswordModal">
+        <div class="modal-content">
+            <h2>Creá tu contraseña</h2>
+            <p>Además del login con Google, elegí una contraseña para tu cuenta. Entre 8 y 20 caracteres.</p>
+            <input type="password" id="passwordInput" placeholder="Tu contraseña" minlength="8" maxlength="20" autocomplete="new-password">
+            <button class="btn-primary" id="savePasswordBtn">Guardar contraseña</button>
+        </div>
+    </div>
+
+    <div class="modal" id="accountModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Mi cuenta</h2>
+            <p><strong>Usuario:</strong> <span id="accName">@</span></p>
+            <p><strong>ID:</strong> <span id="accId">-</span></p>
+            <p><strong>Fecha de registro:</strong> <span id="accDate">-</span></p>
+            <p><strong>Curis subidos:</strong> <span id="accUploads">0</span></p>
+            <p><strong>Curis calificados:</strong> <span id="accRated">0</span></p>
+            <a href="perfil.html" class="btn-primary" style="margin-top:1rem; display:inline-block; text-align:center; text-decoration:none;">Ver perfil completo</a>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="app.js"></script>
+    <script src="animated-bg.js?v=9"></script>
+</body>
+</html>

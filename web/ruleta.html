@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-3413374034507030">
+    <meta name="description" content="La Ruleta de estrellas de CurisFandom: giro gratis cada 20 horas, premios de 1 a 50 estrellas y un giro extra mirando un anuncio de 30 segundos.">
+    <link rel="canonical" href="https://curisfandom.onrender.com/ruleta.html">
+    <title>Ruleta de estrellas</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3413374034507030"
+     crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <header class="top-bar">
+        <a href="index.html" class="logo-mini">
+            <span class="logo-c">C</span>uris<span class="logo-fandom">Fandom</span>
+        </a>
+
+        <div class="user-area" id="userArea">
+            <span class="user-name" id="userName">Invitado</span>
+            <div class="avatar" id="userAvatar">👤</div>
+            <button class="btn-google" id="googleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="user-menu" id="userMenu" style="display:none;">
+                <button class="menu-btn" id="myAccountBtn">Mi cuenta</button>
+                <button class="menu-btn" id="logoutBtn">Cerrar sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="page-header">
+            <h1 class="page-title">🎡 Ruleta de estrellas</h1>
+            <div class="page-header-actions">
+                <a href="index.html" class="btn-back-home">← Volver al inicio</a>
+            </div>
+        </div>
+
+        <section class="profile-section legal-content">
+            <div class="ruleta-wrap">
+                <p class="content-lead" style="margin-bottom:0">Girá la ruleta y ganá
+                estrellas. Tenés <strong>un giro gratis cada 20 horas</strong>. Si querés
+                seguir girando, mirá un anuncio de 30 segundos y se te habilita otro giro.</p>
+
+                <div class="ruleta-balance">⭐ <span id="ruletaBal">0</span> estrellas de la ruleta</div>
+
+                <div class="ruleta-stage">
+                    <div class="ruleta-pointer"></div>
+                    <canvas id="ruletaCanvas" width="340" height="340"></canvas>
+                    <div class="ruleta-hub">🎡</div>
+                </div>
+
+                <div class="ruleta-result" id="ruletaResult">&nbsp;</div>
+
+                <button class="ruleta-btn" id="ruletaSpinBtn">Girar</button>
+                <div class="ruleta-note" id="ruletaStatus"></div>
+
+                <p class="ruleta-note">El premio mayor son <strong>50 estrellas</strong> y
+                tiene muy baja probabilidad. Las estrellas de la ruleta se guardan en este
+                navegador; por ahora son un juego aparte del límite diario de calificación.</p>
+
+                <table class="ruleta-odds">
+                    <thead><tr><th>Premio</th><th>Probabilidad</th></tr></thead>
+                    <tbody id="ruletaOdds"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div class="ruleta-ad-overlay" id="ruletaAdOverlay">
+        <div class="ruleta-ad-box">
+            <p>Mirando un anuncio para habilitar otro giro…</p>
+            <div class="count" id="ruletaAdCount">30</div>
+            <p class="ruleta-note" style="margin:0">No cierres esta ventana.</p>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <a href="index.html">Inicio</a><span>·</span>
+        <a href="como-funciona.html">Cómo funciona</a><span>·</span>
+        <a href="galeria.html">Galería</a><span>·</span>
+        <a href="ranking.html">Ranking</a><span>·</span>
+        <a href="guia.html">Guía</a><span>·</span>
+        <a href="faq.html">Preguntas frecuentes</a><span>·</span>
+        <a href="novedades.html">Novedades</a><span>·</span>
+        <a href="calcador.html">Calcador</a><span>·</span>
+        <a href="guia-dibujar.html">Guía de dibujo</a><span>·</span>
+        <a href="mailto:curisfandom@gmail.com?subject=Sugerencia%20para%20CurisFandom">Sugerencias</a><span>·</span>
+        <a href="legal.html">Privacidad y Términos</a>
+    </footer>
+
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Inicia sesión para continuar</h2>
+            <p id="loginMessage">Necesitas iniciar sesión para poder calificar Curis.</p>
+            <button class="btn-google btn-google-big" id="modalGoogleBtn">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G" class="google-icon">
+                Iniciar sesión con Google
+            </button>
+            <div class="other-methods" style="opacity:.4;pointer-events:none;">
+                <p class="hint">Otros métodos próximamente</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="chooseNameModal">
+        <div class="modal-content">
+            <h2>Elige tu nombre</h2>
+            <p>Este será el nombre que aparecerá cuando subas tus Curis.</p>
+            <input type="text" id="usernameInput" placeholder="Escribe tu nombre de usuario" maxlength="20">
+            <button class="btn-primary" id="saveNameBtn">Guardar nombre</button>
+        </div>
+    </div>
+
+    <div class="modal" id="choosePasswordModal">
+        <div class="modal-content">
+            <h2>Creá tu contraseña</h2>
+            <p>Además del login con Google, elegí una contraseña para tu cuenta. Entre 8 y 20 caracteres.</p>
+            <input type="password" id="passwordInput" placeholder="Tu contraseña" minlength="8" maxlength="20" autocomplete="new-password">
+            <button class="btn-primary" id="savePasswordBtn">Guardar contraseña</button>
+        </div>
+    </div>
+
+    <div class="modal" id="accountModal">
+        <div class="modal-content">
+            <button class="modal-close" data-close>×</button>
+            <h2>Mi cuenta</h2>
+            <p><strong>Usuario:</strong> <span id="accName">@</span></p>
+            <p><strong>ID:</strong> <span id="accId">-</span></p>
+            <p><strong>Fecha de registro:</strong> <span id="accDate">-</span></p>
+            <p><strong>Curis subidos:</strong> <span id="accUploads">0</span></p>
+            <p><strong>Curis calificados:</strong> <span id="accRated">0</span></p>
+            <a href="perfil.html" class="btn-primary" style="margin-top:1rem; display:inline-block; text-align:center; text-decoration:none;">Ver perfil completo</a>
+        </div>
+    </div>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="app.js"></script>
+    <script src="animated-bg.js?v=9"></script>
+
+    <script>
+    (function () {
+        'use strict';
+
+        // Premios de la ruleta. weight = peso relativo (no %); la probabilidad
+        // real se calcula sobre la suma. El premio mayor (50) tiene peso 3 de
+        // 200 -> 1,5 %. Los 8 segmentos se dibujan del mismo tamaño; el premio
+        // se sortea por peso, no por el tamaño de la porción.
+        var PRIZES = [
+            { stars: 1,  weight: 50, color: '#7c5cff' },
+            { stars: 5,  weight: 30, color: '#00d4ff' },
+            { stars: 2,  weight: 40, color: '#ff5ca8' },
+            { stars: 10, weight: 12, color: '#3ddc97' },
+            { stars: 3,  weight: 38, color: '#ffb020' },
+            { stars: 8,  weight: 20, color: '#ff8a3d' },
+            { stars: 15, weight: 7,  color: '#a855f7' },
+            { stars: 50, weight: 3,  color: '#ffd700' }
+        ];
+        var N = PRIZES.length;
+        var SEG = 360 / N;
+        var TOTAL_W = PRIZES.reduce(function (s, p) { return s + p.weight; }, 0);
+        var SPIN_MS = 4700;
+        var FREE_EVERY_MS = 20 * 60 * 60 * 1000;
+
+        var LS_BAL = 'ruleta:stars:v1';
+        var LS_NEXT = 'ruleta:nextFree:v1';
+
+        var canvas = document.getElementById('ruletaCanvas');
+        var cx = canvas.getContext('2d');
+        var spinBtn = document.getElementById('ruletaSpinBtn');
+        var resultEl = document.getElementById('ruletaResult');
+        var statusEl = document.getElementById('ruletaStatus');
+        var balEl = document.getElementById('ruletaBal');
+        var oddsEl = document.getElementById('ruletaOdds');
+        var adOverlay = document.getElementById('ruletaAdOverlay');
+        var adCountEl = document.getElementById('ruletaAdCount');
+
+        var spinning = false;
+        var currentRot = 0;
+        var adCredit = 0;          // giros extra ganados por anuncio (en memoria)
+        var statusTimer = null;
+
+        function lsGet(k, d) { try { return localStorage.getItem(k); } catch (e) { return d; } }
+        function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
+        function getBalance() { return parseInt(lsGet(LS_BAL, '0'), 10) || 0; }
+        function setBalance(v) { lsSet(LS_BAL, String(v)); balEl.textContent = v; }
+        function nextFreeAt() { return parseInt(lsGet(LS_NEXT, '0'), 10) || 0; }
+        function freeReady() { return Date.now() >= nextFreeAt(); }
+
+        function fmtCountdown(ms) {
+            var s = Math.max(0, Math.round(ms / 1000));
+            var h = Math.floor(s / 3600);
+            var m = Math.floor((s % 3600) / 60);
+            if (h > 0) return h + ' h ' + m + ' min';
+            if (m > 0) return m + ' min';
+            return s + ' s';
+        }
+
+        // ---------- dibujo de la rueda ----------
+        function drawWheel() {
+            var size = canvas.width;
+            var r = size / 2;
+            cx.clearRect(0, 0, size, size);
+            for (var i = 0; i < N; i++) {
+                // segmento i: desde el tope, en sentido horario
+                var a0 = (-90 + i * SEG) * Math.PI / 180;
+                var a1 = (-90 + (i + 1) * SEG) * Math.PI / 180;
+                cx.beginPath();
+                cx.moveTo(r, r);
+                cx.arc(r, r, r - 2, a0, a1);
+                cx.closePath();
+                cx.fillStyle = PRIZES[i].color;
+                cx.fill();
+                cx.strokeStyle = 'rgba(0,0,0,0.28)';
+                cx.lineWidth = 2;
+                cx.stroke();
+
+                // etiqueta
+                cx.save();
+                cx.translate(r, r);
+                cx.rotate((a0 + a1) / 2);
+                cx.textAlign = 'right';
+                cx.textBaseline = 'middle';
+                cx.fillStyle = '#10101f';
+                cx.font = '700 ' + (PRIZES[i].stars === 50 ? 20 : 16) + 'px Poppins, sans-serif';
+                cx.fillText('★ ' + PRIZES[i].stars, r - 18, 0);
+                cx.restore();
+            }
+            // aro exterior
+            cx.beginPath();
+            cx.arc(r, r, r - 2, 0, Math.PI * 2);
+            cx.strokeStyle = 'rgba(255,255,255,0.35)';
+            cx.lineWidth = 4;
+            cx.stroke();
+        }
+
+        function weightedPick() {
+            var roll = Math.random() * TOTAL_W;
+            for (var i = 0; i < N; i++) {
+                roll -= PRIZES[i].weight;
+                if (roll <= 0) return i;
+            }
+            return N - 1;
+        }
+
+        // ---------- estado del botón ----------
+        function renderStatus() {
+            if (statusTimer) { clearTimeout(statusTimer); statusTimer = null; }
+            if (spinning) { spinBtn.disabled = true; return; }
+
+            if (freeReady() || adCredit > 0) {
+                spinBtn.disabled = false;
+                spinBtn.textContent = 'Girar';
+                statusEl.textContent = freeReady()
+                    ? 'Tenés un giro gratis disponible.'
+                    : 'Giro extra habilitado por el anuncio.';
+            } else {
+                spinBtn.disabled = false;
+                spinBtn.textContent = '🎬 Ver anuncio de 30 s para girar de nuevo';
+                var left = nextFreeAt() - Date.now();
+                statusEl.textContent = 'Próximo giro gratis en ' + fmtCountdown(left) + '.';
+                statusTimer = setTimeout(renderStatus, 30000);
+            }
+        }
+
+        // ---------- girar ----------
+        function doSpin() {
+            if (spinning) return;
+            var usedFree = freeReady();
+            if (!usedFree && adCredit <= 0) { runAd(); return; }
+
+            spinning = true;
+            spinBtn.disabled = true;
+            resultEl.innerHTML = '&nbsp;';
+
+            if (usedFree) lsSet(LS_NEXT, String(Date.now() + FREE_EVERY_MS));
+            else adCredit -= 1;
+
+            var idx = weightedPick();
+            var prize = PRIZES[idx];
+            var segCenter = idx * SEG + SEG / 2;
+            var jitter = (Math.random() - 0.5) * (SEG * 0.55);
+            var desired = ((360 - segCenter - jitter) % 360 + 360) % 360;
+            var turns = 5 + Math.floor(Math.random() * 3);
+            var target = currentRot - (currentRot % 360) + turns * 360 + desired;
+            while (target <= currentRot + 360) target += 360;
+            currentRot = target;
+            canvas.style.transform = 'rotate(' + currentRot + 'deg)';
+
+            setTimeout(function () {
+                spinning = false;
+                setBalance(getBalance() + prize.stars);
+                resultEl.textContent = prize.stars === 50
+                    ? '🎉 ¡JACKPOT! Ganaste 50 estrellas'
+                    : '¡Ganaste ' + prize.stars + (prize.stars === 1 ? ' estrella!' : ' estrellas!');
+                renderStatus();
+            }, SPIN_MS + 60);
+        }
+
+        // ---------- anuncio de 30 s ----------
+        function runAd() {
+            var t = 30;
+            adCountEl.textContent = t;
+            adOverlay.classList.add('show');
+            var iv = setInterval(function () {
+                t -= 1;
+                adCountEl.textContent = t;
+                if (t <= 0) {
+                    clearInterval(iv);
+                    adOverlay.classList.remove('show');
+                    adCredit += 1;
+                    resultEl.innerHTML = '&nbsp;';
+                    renderStatus();
+                }
+            }, 1000);
+        }
+
+        // ---------- tabla de probabilidades ----------
+        function renderOdds() {
+            var rows = PRIZES.slice().sort(function (a, b) { return b.stars - a.stars; });
+            oddsEl.innerHTML = rows.map(function (p) {
+                var pct = (p.weight / TOTAL_W * 100);
+                pct = pct < 10 ? pct.toFixed(1) : String(Math.round(pct));
+                return '<tr><td>★ ' + p.stars + (p.stars === 1 ? ' estrella' : ' estrellas') +
+                    '</td><td>' + pct + ' %</td></tr>';
+            }).join('');
+        }
+
+        spinBtn.addEventListener('click', doSpin);
+        drawWheel();
+        renderOdds();
+        setBalance(getBalance());
+        renderStatus();
+    })();
+    </script>
+</body>
+</html>

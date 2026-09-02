@@ -2186,3 +2186,210 @@ select:focus {
     transform: translateY(-2px);
     box-shadow: 0 12px 28px rgba(139, 92, 246, 0.35);
 }
+
+/* ---------- botón nuevo del calcador en la home ---------- */
+
+.btn-calcador .btn-icon { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+.btn-calcador:hover { border-color: #f59e0b; box-shadow: 0 10px 26px rgba(245, 158, 11, 0.25); }
+
+/* ---------- cursor personalizado (bolita blanca, solo pantallas con mouse) ---------- */
+
+@media (pointer: fine) {
+    html.cf-cursor-on, html.cf-cursor-on * { cursor: none !important; }
+}
+
+.cf-cursor {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 22px;
+    height: 22px;
+    margin: -11px 0 0 -11px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25), 0 2px 12px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+    z-index: 2147483647;
+    transition: width 0.13s ease, height 0.13s ease, margin 0.13s ease,
+                background 0.13s ease, opacity 0.2s ease;
+    will-change: transform;
+}
+
+.cf-cursor.is-down { width: 15px; height: 15px; margin: -7.5px 0 0 -7.5px; }
+
+.cf-cursor.is-link {
+    width: 36px;
+    height: 36px;
+    margin: -18px 0 0 -18px;
+    background: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9);
+}
+
+.cf-cursor.is-hidden { opacity: 0; }
+
+/* ---------- botón flotante discreto de la ruleta (home) ---------- */
+
+.ruleta-float-btn {
+    position: fixed;
+    left: 0;
+    bottom: 92px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    border-left: 0;
+    border-radius: 0 999px 999px 0;
+    font-size: 1.35rem;
+    line-height: 1;
+    opacity: 0.42;
+    z-index: 40;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.ruleta-float-btn:hover {
+    opacity: 1;
+    transform: scale(1.08);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* ---------- ruleta.html ---------- */
+
+.ruleta-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+    text-align: center;
+}
+
+.ruleta-stage {
+    position: relative;
+    width: min(340px, 82vw);
+    height: min(340px, 82vw);
+}
+
+.ruleta-stage canvas {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+    transition: transform 4.6s cubic-bezier(0.12, 0.62, 0.06, 1);
+}
+
+.ruleta-pointer {
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 26px solid var(--warning);
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.5));
+    z-index: 3;
+}
+
+.ruleta-hub {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 46px;
+    height: 46px;
+    margin: -23px 0 0 -23px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--warning);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+}
+
+.ruleta-balance {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.1rem;
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.ruleta-btn {
+    padding: 0.85rem 2rem;
+    border: 0;
+    border-radius: 999px;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    cursor: pointer;
+    background: var(--brand-gradient);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.ruleta-btn:hover { transform: translateY(-2px); }
+.ruleta-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.ruleta-result {
+    min-height: 1.6rem;
+    font-weight: 600;
+    color: var(--warning);
+}
+
+.ruleta-note { color: var(--text-muted); font-size: 0.85rem; max-width: 460px; line-height: 1.6; }
+
+.ruleta-odds {
+    width: 100%;
+    max-width: 460px;
+    margin: 0.5rem auto 0;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.ruleta-odds th, .ruleta-odds td {
+    padding: 0.35rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+}
+
+.ruleta-odds td:last-child, .ruleta-odds th:last-child { text-align: right; color: var(--text-muted); }
+
+/* cuenta regresiva de anuncio (ruleta.html, independiente de app.js) */
+.ruleta-ad-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 10, 22, 0.86);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.ruleta-ad-overlay.show { display: flex; }
+
+.ruleta-ad-box {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem 1.6rem;
+    text-align: center;
+    max-width: 340px;
+}
+
+.ruleta-ad-box .count {
+    font-size: 2.4rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin: 0.6rem 0;
+}

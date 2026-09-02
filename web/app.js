@@ -1527,6 +1527,50 @@
             .catch(err => alert('No se pudo borrar todo: ' + err.message));
     }
 
+    // Cursor personalizado: una bolita blanca que reemplaza al puntero en
+    // pantallas con mouse (no toca celulares / pantallas táctiles). Si algo
+    // falla, el navegador sigue mostrando el cursor nativo (la clase
+    // cf-cursor-on que oculta el nativo solo se agrega si esto corre bien).
+    function initCustomCursor() {
+        if (!window.matchMedia || !window.matchMedia('(pointer: fine)').matches) return;
+        if (document.querySelector('.cf-cursor')) return;
+
+        const dot = document.createElement('div');
+        dot.className = 'cf-cursor is-hidden';
+        document.body.appendChild(dot);
+        document.documentElement.classList.add('cf-cursor-on');
+
+        let x = window.innerWidth / 2, y = window.innerHeight / 2;
+        let tx = x, ty = y, running = false;
+        const INTERACTIVE = 'a,button,input,textarea,select,label,[role="button"],.main-btn,.star-icon,.menu-btn';
+
+        function loop() {
+            x += (tx - x) * 0.35;
+            y += (ty - y) * 0.35;
+            dot.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+            if (Math.abs(tx - x) > 0.1 || Math.abs(ty - y) > 0.1) {
+                requestAnimationFrame(loop);
+            } else {
+                running = false;
+            }
+        }
+        function kick() { if (!running) { running = true; requestAnimationFrame(loop); } }
+
+        document.addEventListener('pointermove', (e) => {
+            if (e.pointerType && e.pointerType !== 'mouse') return;
+            tx = e.clientX; ty = e.clientY;
+            dot.classList.remove('is-hidden');
+            const el = e.target && e.target.closest ? e.target.closest(INTERACTIVE) : null;
+            dot.classList.toggle('is-link', !!el);
+            kick();
+        }, { passive: true });
+        document.addEventListener('pointerdown', () => dot.classList.add('is-down'));
+        document.addEventListener('pointerup', () => dot.classList.remove('is-down'));
+        window.addEventListener('blur', () => dot.classList.add('is-hidden'));
+        document.addEventListener('mouseleave', () => dot.classList.add('is-hidden'));
+        document.addEventListener('mouseenter', () => dot.classList.remove('is-hidden'));
+    }
+
     function bind() {
         const page = document.body.dataset.page;
 
@@ -1615,6 +1659,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         bind();
+        initCustomCursor();
         const page = document.body.dataset.page;
 
         loadConfig().then(() => refreshAuthState()).then(() => {
