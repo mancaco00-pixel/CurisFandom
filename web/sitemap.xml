@@ -15,5 +15,7 @@
   <url><loc>https://curisfandom.onrender.com/galeria.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://curisfandom.onrender.com/ranking.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
   <url><loc>https://curisfandom.onrender.com/novedades.html</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://curisfandom.onrender.com/acerca.html</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://curisfandom.onrender.com/contacto.html</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://curisfandom.onrender.com/legal.html</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>
