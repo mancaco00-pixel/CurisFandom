@@ -1657,9 +1657,21 @@
         }
     }
 
+    // Marca el link del menú principal que corresponde a la página actual.
+    function markCurrentNav() {
+        const here = location.pathname.split('/').pop() || 'index.html';
+        document.querySelectorAll('.site-nav a').forEach(a => {
+            const target = a.getAttribute('href');
+            if (target === here || (target === 'index.html' && (here === '' || here === 'index.html'))) {
+                a.setAttribute('aria-current', 'page');
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         bind();
         initCustomCursor();
+        markCurrentNav();
         const page = document.body.dataset.page;
 
         loadConfig().then(() => refreshAuthState()).then(() => {
