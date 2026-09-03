@@ -98,6 +98,22 @@ const app = express();
 app.set('trust proxy', true);
 app.disable('x-powered-by');
 
+// ---------- redirección al dominio canónico ----------
+// Se activa recién cuando se setea CANONICAL_HOST (ej. "curisfandom.com") en
+// las variables de entorno de Render, una vez que el dominio propio ya
+// resuelve y tiene HTTPS. Manda todo lo que llegue por otro host (el viejo
+// *.onrender.com, www., etc.) al dominio final con un 301. Sin la variable
+// seteada no hace nada, así que es seguro deployar esto antes del cambio.
+const CANONICAL_HOST = process.env.CANONICAL_HOST || null;
+if (PROD && CANONICAL_HOST) {
+    app.use((req, res, next) => {
+        if (req.headers.host && req.headers.host !== CANONICAL_HOST) {
+            return res.redirect(301, 'https://' + CANONICAL_HOST + req.originalUrl);
+        }
+        next();
+    });
+}
+
 // ---------- cabeceras de seguridad ----------
 app.use((req, res, next) => {
     res.setHeader('X-Frame-Options', 'DENY');
@@ -115,7 +131,7 @@ app.use((req, res, next) => {
         "default-src 'self'",
         "script-src 'self' 'unsafe-inline' https://accounts.google.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com",
         "frame-src https://accounts.google.com https://*.doubleclick.net https://*.googlesyndication.com",
-        "img-src 'self' data: blob: https://*.r2.dev https://*.gstatic.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net",
+        "img-src 'self' data: blob: https://*.r2.dev https://img.curisfandom.com https://*.gstatic.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net",
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
         "font-src 'self' https://fonts.gstatic.com",
         "connect-src 'self' https://pagead2.googlesyndication.com https://*.google.com https://*.doubleclick.net",
