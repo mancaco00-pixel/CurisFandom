@@ -8,6 +8,15 @@
     // dónde vivir en el servidor.
     const PROFILE_KEY = 'curisfandom_profile_v1';
 
+    // Escapa texto de origen no confiable (nombres de usuario) antes de
+    // insertarlo con innerHTML. El servidor ya valida el formato del nombre,
+    // esto es la segunda barrera.
+    function esc(s) {
+        return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
     const LIMITS = {
         nameMin: 3,
         nameMax: 20,
@@ -385,7 +394,8 @@
         // nombre -- a esa altura nunca tienen Curis subidos ni
         // calificaciones, así que mostrar 0 acá es siempre correcto.
         $('accName').textContent = state.user.name || '-';
-        $('accId').textContent = state.user.id;
+        // No se muestra el id interno (deriva del identificador de Google).
+        if ($('accId')) $('accId').textContent = '—';
         $('accDate').textContent = new Date(state.user.registeredAt).toLocaleDateString();
         $('accUploads').textContent = '0';
         $('accRated').textContent = '0';
@@ -860,17 +870,15 @@
         if (!list) return;
 
         api('/curis/ranking').then(raw => {
-            const myId = state.user ? state.user.id : null;
             const allCuris = raw.map(c => ({
                 id: c.id,
                 creator: c.creator,
-                creatorId: c.creatorId,
                 color1: c.color1,
                 color2: c.color2,
                 avg: c.avg || 0,
                 count: c.count || 0,
                 imageFile: c.imageFile || null,
-                isMine: c.creatorId === myId
+                isMine: !!c.mine
             }));
             lastRankingCuris = allCuris;
 
@@ -915,7 +923,7 @@
                 return `
                     <tr data-creator="${encodeURIComponent(p.creator)}">
                         <td class="col-pos"><span class="rank-position-badge ${posClass}">${idx + 1}</span></td>
-                        <td class="col-name">@${p.creator}${mineTag}</td>
+                        <td class="col-name">@${esc(p.creator)}${mineTag}</td>
                         <td class="col-tier"><span class="tier-badge tier-${tier.code}">${tier.label}</span></td>
                         <td class="col-avg">★ ${p.avg.toFixed(1)}</td>
                         <td class="col-count">${p.count.toLocaleString()}</td>
@@ -937,7 +945,6 @@
     function openCreatorViewer(creator) {
         const viewer = $('imageViewer');
         if (!viewer) return;
-        const myId = state.user ? state.user.id : null;
         const curis = lastRankingCuris.filter(c => c.creator === creator);
         if (curis.length === 0) return;
         const cards = curis.map(c => {
@@ -947,9 +954,9 @@
             const tier = tierForAvg(c.avg, c.count);
             return `<div style="width:160px;">${inner}<p style="text-align:center; margin-top:.4rem; font-size:.85rem;">★ ${(c.avg||0).toFixed(1)} · ${c.count} calif.</p><p style="text-align:center;"><span class="tier-badge tier-${tier.code}">${tier.label}</span></p></div>`;
         }).join('');
-        const isMine = curis.some(c => c.creatorId === myId);
+        const isMine = curis.some(c => c.mine);
         viewer.innerHTML = `
-            <h3 style="text-align:center; margin-bottom:1rem;">@${creator} ${isMine ? '<span class="hint">(tú)</span>' : ''}</h3>
+            <h3 style="text-align:center; margin-bottom:1rem;">@${esc(creator)} ${isMine ? '<span class="hint">(tú)</span>' : ''}</h3>
             <div style="display:flex; flex-wrap:wrap; gap:1rem; justify-content:center;">${cards}</div>
         `;
         openModal('imageViewerModal');
@@ -1282,7 +1289,7 @@
         }
         v.innerHTML = `
             ${inner}
-            <h3 style="margin-top:1rem; text-align:center;">@${c.creator}</h3>
+            <h3 style="margin-top:1rem; text-align:center;">@${esc(c.creator)}</h3>
             ${statusLine}
             <p style="text-align:center;" class="hint">${new Date(c.publishedAt).toLocaleDateString()}</p>
         `;
@@ -1461,7 +1468,7 @@
                     <div class="admin-card">
                         <div class="admin-card-img" ${bg}></div>
                         <div class="admin-card-body">
-                            <p class="admin-card-creator">@${c.creator}</p>
+                            <p class="admin-card-creator">@${esc(c.creator)}</p>
                             <p class="hint">${date}</p>
                             <p class="hint">★ ${(c.avg || 0).toFixed(1)} · ${c.count || 0} calif.</p>
                             <div class="admin-card-actions">${actions}</div>

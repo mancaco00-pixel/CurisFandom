@@ -32,9 +32,13 @@ async function saveIncoming(id, dataUrl) {
     if (!match) throw new Error('Formato de imagen inválido.');
 
     const input = Buffer.from(match[2], 'base64');
+    // Tope de tamaño del bitmap descomprimido: frena "decompression bombs"
+    // (una imagen chica en bytes que descomprime a cientos de megapíxeles y
+    // hace que libvips consuma toda la memoria/CPU). 40 MP alcanza de sobra
+    // para cualquier foto real; lo que se sube se reescala a 900 px igual.
     let output;
     try {
-        output = await sharp(input)
+        output = await sharp(input, { limitInputPixels: 40_000_000, failOn: 'error' })
             .rotate() // respeta la orientación EXIF antes de descartarla
             .resize({ width: MAX_DIM, height: MAX_DIM, fit: 'inside', withoutEnlargement: true })
             .webp({ quality: WEBP_QUALITY })

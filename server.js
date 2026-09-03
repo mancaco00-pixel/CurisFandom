@@ -26,6 +26,7 @@ const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
+const rateLimit = require('express-rate-limit');
 const db = require('./db');
 const storage = require('./storage');
 
@@ -46,6 +47,19 @@ if (!GOOGLE_CLIENT_ID) {
     console.warn('⚠ GOOGLE_CLIENT_ID no está seteada: el login usa el modo de desarrollo simulado (POST /api/auth/dev-login), no el de Google real. Ver handoff.md para conectarlo.');
 }
 const googleClient = GOOGLE_CLIENT_ID ? new OAuth2Client(GOOGLE_CLIENT_ID) : null;
+
+// true en Render / producción (Render setea la variable de entorno RENDER).
+// Se usa para exigir cookies Secure y para abortar el arranque si faltan los
+// secretos reales (SESSION_SECRET / ADMIN_PASSWORD), en vez de correr en prod
+// con los valores de desarrollo por defecto (todas las sesiones serían
+// forjables si SESSION_SECRET quedara en el default).
+const PROD = process.env.NODE_ENV === 'production' || !!process.env.RENDER;
+if (PROD && (!process.env.SESSION_SECRET || process.env.SESSION_SECRET === 'dev-secret-cambiar-antes-de-publicar')) {
+    throw new Error('SESSION_SECRET no está configurada en producción — abortando el arranque.');
+}
+if (PROD && !process.env.ADMIN_PASSWORD) {
+    throw new Error('ADMIN_PASSWORD no está configurada en producción — abortando el arranque.');
+}
 
 // Login de desarrollo simulado. Siempre disponible si no hay GOOGLE_CLIENT_ID.
 // Si SÍ lo hay (prod), queda deshabilitado salvo que ALLOW_DEV_LOGIN=1, que
@@ -77,8 +91,63 @@ const CURIS_COLORS = [['#ff3d7f', '#ff7a18'], ['#6c5ce7', '#a29bfe'], ['#00d4ff'
 const LATAM_COUNTRIES = new Set(['ar', 'bo', 'br', 'cl', 'co', 'cr', 'cu', 'ec', 'sv', 'gt', 'hn', 'mx', 'ni', 'pa', 'py', 'pe', 'do', 'uy', 've']);
 
 const app = express();
+
+// Render sirve detrás de Cloudflare. Los rate limiters usan el header
+// CF-Connecting-IP (la IP real del cliente que pone Cloudflare) con fallback
+// a req.ip, así que se confía en la cadena de proxies para armar req.ip.
+app.set('trust proxy', true);
+app.disable('x-powered-by');
+
+// ---------- cabeceras de seguridad ----------
+app.use((req, res, next) => {
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=(), browsing-topics=()');
+    if (PROD) res.setHeader('Strict-Transport-Security', 'max-age=15552000; includeSubDomains');
+    // Empieza en Report-Only: no rompe nada, solo reporta en la consola del
+    // navegador. Cuando se confirme que no hay violaciones legítimas, cambiar
+    // el nombre de la cabecera a 'Content-Security-Policy' (sin -Report-Only).
+    // Nota: 'unsafe-inline' en script-src es necesario por los <script> inline
+    // de admin.html / calcador.html / ruleta.html; por eso el XSS se corrige
+    // además con validación + escape, no solo con CSP.
+    res.setHeader('Content-Security-Policy-Report-Only', [
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline' https://accounts.google.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com",
+        "frame-src https://accounts.google.com https://*.doubleclick.net https://*.googlesyndication.com",
+        "img-src 'self' data: blob: https://*.r2.dev https://*.gstatic.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net",
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+        "font-src 'self' https://fonts.gstatic.com",
+        "connect-src 'self' https://pagead2.googlesyndication.com https://*.google.com https://*.doubleclick.net",
+        "base-uri 'self'",
+        "frame-ancestors 'none'",
+        "object-src 'none'"
+    ].join('; '));
+    next();
+});
+
 app.use(express.json({ limit: '8mb' }));
 app.use(express.static(WEB_DIR));
+
+// ---------- rate limiting ----------
+// Límite en memoria: alcanza con 1 instancia (plan free de Render). Si algún
+// día se escala a varias, hace falta un store compartido (Redis).
+const mkLimiter = (windowMin, max) => rateLimit({
+    windowMs: windowMin * 60 * 1000,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    // Cloudflare pone la IP real del visitante en CF-Connecting-IP; sin ese
+    // header (local) se cae a req.ip.
+    keyGenerator: (req) => req.headers['cf-connecting-ip'] || req.ip || 'unknown',
+    // Se usa CF-Connecting-IP a propósito -> se silencia la validación de
+    // "trust proxy permisivo" de express-rate-limit.
+    validate: { trustProxy: false, xForwardedForHeader: false },
+    message: { ok: false, error: 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.' }
+});
+const limiterAdminLogin = mkLimiter(15, 8);
+const limiterAuth = mkLimiter(15, 30);
+const limiterUpload = mkLimiter(60, 20);
 
 // ---------- hashing de contraseña de admin (sin dependencias externas) ----------
 function hashPassword(password) {
@@ -131,11 +200,13 @@ function parseCookies(req) {
     });
     return out;
 }
+// El flag Secure solo en producción: en local el server corre sobre
+// http://localhost y una cookie Secure no se enviaría nunca.
 function setCookie(res, name, value, maxAgeSeconds) {
-    res.setHeader('Set-Cookie', `${name}=${value}; HttpOnly; Path=/; SameSite=Strict; Max-Age=${maxAgeSeconds}`);
+    res.setHeader('Set-Cookie', `${name}=${value}; HttpOnly;${PROD ? ' Secure;' : ''} Path=/; SameSite=Strict; Max-Age=${maxAgeSeconds}`);
 }
 function clearCookie(res, name) {
-    res.setHeader('Set-Cookie', `${name}=; HttpOnly; Path=/; SameSite=Strict; Max-Age=0`);
+    res.setHeader('Set-Cookie', `${name}=;${PROD ? ' Secure;' : ''} HttpOnly; Path=/; SameSite=Strict; Max-Age=0`);
 }
 
 const USER_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 días: "mantener la sesión iniciada"
@@ -163,11 +234,14 @@ function todayStr() {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
-function toPublicCuris(c) {
+// viewerId (opcional): id del usuario que hace el pedido. Solo se devuelve un
+// booleano "mine" -- el creator_id real (derivado del sub de Google) nunca
+// sale al cliente, para no exponer identificadores de cuenta.
+function toPublicCuris(c, viewerId) {
     return {
         id: c.id,
         creator: c.creator_name,
-        creatorId: c.creator_id,
+        mine: viewerId ? c.creator_id === viewerId : false,
         imageFile: storage.publicUrl(c.image_file),
         color1: c.color1,
         color2: c.color2,
@@ -201,7 +275,7 @@ app.get('/api/config', (req, res) => res.json(CONFIG));
 // cookie/mecanismo que va a usar el login de Google) para poder seguir
 // probando todo el resto del sitio sin depender de tener credenciales de
 // Google a mano.
-app.post('/api/auth/dev-login', asyncRoute(async (req, res) => {
+app.post('/api/auth/dev-login', limiterAuth, asyncRoute(async (req, res) => {
     if (!ALLOW_DEV_LOGIN) return res.status(404).json({ ok: false, error: 'Login de desarrollo deshabilitado: ya hay login de Google real configurado.' });
     const userId = 'dev_' + crypto.randomBytes(8).toString('hex');
     await db.upsertUser(userId, null);
@@ -213,7 +287,7 @@ app.post('/api/auth/dev-login', asyncRoute(async (req, res) => {
 // dio Google Identity Services. Se verifica la firma/audiencia/vencimiento
 // contra los servidores de Google -- recién ahí se confía en el email/
 // nombre/id que dice tener.
-app.post('/api/auth/google', asyncRoute(async (req, res) => {
+app.post('/api/auth/google', limiterAuth, asyncRoute(async (req, res) => {
     if (!googleClient) return res.status(501).json({ ok: false, error: 'Login de Google no está configurado en el servidor (falta GOOGLE_CLIENT_ID).' });
     const credential = req.body.credential;
     if (!credential) return res.status(400).json({ ok: false, error: 'Falta el token de Google.' });
@@ -248,8 +322,22 @@ app.get('/api/auth/me', asyncRoute(async (req, res) => {
 
 app.post('/api/auth/set-name', requireUser, asyncRoute(async (req, res) => {
     const name = (req.body.name || '').trim();
-    if (!name) return res.status(400).json({ ok: false, error: 'Falta el nombre.' });
-    await db.setUserName(req.userId, name);
+    // Validación server-side (el cliente ya la hace, pero un pedido directo la
+    // saltea): 3-20 caracteres, solo letras/números/guion bajo. Sin esto, un
+    // nombre con HTML se guardaba y se renderizaba con innerHTML en el ranking
+    // y en el panel de admin -> XSS almacenado.
+    if (!/^[A-Za-z0-9_]{3,20}$/.test(name)) {
+        return res.status(400).json({ ok: false, error: 'El nombre debe tener entre 3 y 20 caracteres: solo letras, números y guion bajo.' });
+    }
+    try {
+        await db.setUserName(req.userId, name);
+    } catch (e) {
+        // 409 / 23505 = índice único sobre lower(name) (ver plan de remediación).
+        if (e.status === 409 || (e.data && String(e.data.code) === '23505')) {
+            return res.status(409).json({ ok: false, error: 'Ese nombre ya está en uso.' });
+        }
+        throw e;
+    }
     res.json({ ok: true });
 }));
 
@@ -266,7 +354,7 @@ app.post('/api/auth/set-password', requireUser, asyncRoute(async (req, res) => {
 
 // ---------------------------- rutas de datos (requieren sesión) ----------------------------
 
-app.post('/api/curis', requireUser, asyncRoute(async (req, res) => {
+app.post('/api/curis', limiterUpload, requireUser, asyncRoute(async (req, res) => {
     const user = await db.getUserById(req.userId);
     const imageData = req.body.imageData;
     if (!user || !user.name || !imageData) return res.status(400).json({ ok: false, error: 'Datos inválidos.' });
@@ -305,7 +393,7 @@ app.get('/api/curis/rate-state', requireUser, asyncRoute(async (req, res) => {
         db.ensureDailyStars(userId, todayStr())
     ]);
     const cap = ds.extended ? CONFIG.starsCapExtended : CONFIG.starsCapBase;
-    res.json({ pool: poolRows.map(toPublicCuris), total, rated, starsToday: { total: ds.total, cap } });
+    res.json({ pool: poolRows.map(c => toPublicCuris(c, userId)), total, rated, starsToday: { total: ds.total, cap } });
 }));
 
 app.post('/api/ratings', requireUser, asyncRoute(async (req, res) => {
@@ -324,13 +412,16 @@ app.post('/api/ratings', requireUser, asyncRoute(async (req, res) => {
     }
 }));
 
-app.post('/api/ratings/extend', requireUser, asyncRoute(async (req, res) => {
+app.post('/api/ratings/extend', limiterAuth, requireUser, asyncRoute(async (req, res) => {
     const ds = await db.setDailyStarsExtended(req.userId, todayStr());
     res.json({ ok: true, starsToday: { total: ds.total, cap: CONFIG.starsCapExtended } });
 }));
 
 app.get('/api/curis/ranking', asyncRoute(async (req, res) => {
-    res.json((await db.listApprovedForRanking()).map(toPublicCuris));
+    // Endpoint público: se lee la sesión solo si viene, para marcar "mine".
+    const session = verifySession(parseCookies(req).user_session);
+    const viewerId = session && session.userId;
+    res.json((await db.listApprovedForRanking()).map(c => toPublicCuris(c, viewerId)));
 }));
 
 app.get('/api/curis/mine', requireUser, asyncRoute(async (req, res) => {
@@ -338,7 +429,7 @@ app.get('/api/curis/mine', requireUser, asyncRoute(async (req, res) => {
         db.listByCreator(req.userId),
         db.countRatingsByUser(req.userId)
     ]);
-    res.json({ curis: curis.map(toPublicCuris), ratedCount });
+    res.json({ curis: curis.map(c => toPublicCuris(c, req.userId)), ratedCount });
 }));
 
 app.post('/api/account/delete-curis', requireUser, asyncRoute(async (req, res) => {
@@ -349,7 +440,7 @@ app.post('/api/account/delete-curis', requireUser, asyncRoute(async (req, res) =
 
 // ---------------------------- admin ----------------------------
 
-app.post('/api/admin/login', (req, res) => {
+app.post('/api/admin/login', limiterAdminLogin, (req, res) => {
     const password = req.body.password || '';
     if (!verifyPassword(password, ADMIN_PASSWORD_HASH)) {
         return res.status(401).json({ ok: false, error: 'Contraseña incorrecta.' });
@@ -371,7 +462,7 @@ app.get('/api/admin/me', (req, res) => {
 app.get('/api/admin/queue', requireAdmin, asyncRoute(async (req, res) => {
     const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : 'pending';
     const [items, counts] = await Promise.all([db.listByStatus(status), db.statusCounts()]);
-    res.json({ items: items.map(toPublicCuris), counts });
+    res.json({ items: items.map(c => toPublicCuris(c)), counts });
 }));
 
 app.post('/api/admin/curis/:id/status', requireAdmin, asyncRoute(async (req, res) => {
