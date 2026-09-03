@@ -370,10 +370,18 @@ app.post('/api/auth/set-password', requireUser, asyncRoute(async (req, res) => {
 
 // ---------------------------- rutas de datos (requieren sesión) ----------------------------
 
+const MAX_PENDING_PER_USER = 5;
+
 app.post('/api/curis', limiterUpload, requireUser, asyncRoute(async (req, res) => {
     const user = await db.getUserById(req.userId);
     const imageData = req.body.imageData;
     if (!user || !user.name || !imageData) return res.status(400).json({ ok: false, error: 'Datos inválidos.' });
+
+    // Tope de Curis en cola de revisión por usuario: evita que uno solo llene
+    // la cola de moderación y el bucket de imágenes.
+    if (await db.countPendingByCreator(req.userId) >= MAX_PENDING_PER_USER) {
+        return res.status(429).json({ ok: false, error: `Ya tenés ${MAX_PENDING_PER_USER} Curis esperando revisión. Esperá a que se aprueben antes de subir más.` });
+    }
 
     // musicTrack es el "id" de una canción de web/music-library.js, no una
     // URL ni un archivo, con un "@<segundo>" opcional al final (el punto de

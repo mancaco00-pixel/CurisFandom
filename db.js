@@ -104,6 +104,14 @@ async function listByCreator(creatorId) {
     return request('/curis' + qs({ creator_id: `eq.${creatorId}`, select: '*', order: 'published_at.desc' }));
 }
 
+// Cuántos Curis tiene el usuario esperando revisión -- se usa para limitar
+// cuántos puede tener en cola a la vez (evita que uno solo llene la cola de
+// moderación y el bucket de imágenes).
+async function countPendingByCreator(creatorId) {
+    const rows = await request('/curis' + qs({ creator_id: `eq.${creatorId}`, status: 'eq.pending', select: 'id' }));
+    return rows.length;
+}
+
 async function listByStatus(status) {
     return request('/curis' + qs({ status: `eq.${status}`, select: '*', order: 'published_at.desc' }));
 }
@@ -232,6 +240,7 @@ module.exports = {
     countRatingsByUser,
     listApprovedForRanking,
     listByCreator,
+    countPendingByCreator,
     listByStatus,
     statusCounts,
     setCurisStatus,
