@@ -1,7 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
-Disallow: /test-bg.html
 Disallow: /api/
 
 Sitemap: https://curisfandom.com/sitemap.xml

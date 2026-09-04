@@ -229,6 +229,7 @@ const USER_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 días: "mantener la 
 const ADMIN_SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 
 function requireAdmin(req, res, next) {
+    res.setHeader('Cache-Control', 'no-store');
     const session = verifySession(parseCookies(req).admin_session);
     if (!session || !session.admin) return res.status(401).json({ ok: false, error: 'No autorizado.' });
     next();
@@ -239,6 +240,7 @@ function requireAdmin(req, res, next) {
 // que mandara el navegador -- ahora el id sale de una cookie firmada por
 // el servidor, imposible de fabricar sin conocer SESSION_SECRET.
 function requireUser(req, res, next) {
+    res.setHeader('Cache-Control', 'no-store');
     const session = verifySession(parseCookies(req).user_session);
     if (!session || !session.userId) return res.status(401).json({ ok: false, error: 'Necesitás iniciar sesión.' });
     req.userId = session.userId;
@@ -329,6 +331,7 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 app.get('/api/auth/me', asyncRoute(async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
     const session = verifySession(parseCookies(req).user_session);
     if (!session) return res.json({ authenticated: false });
     const user = await db.getUserById(session.userId);
@@ -479,6 +482,7 @@ app.post('/api/admin/logout', (req, res) => {
 });
 
 app.get('/api/admin/me', (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
     const session = verifySession(parseCookies(req).admin_session);
     res.json({ authed: !!(session && session.admin) });
 });
@@ -490,6 +494,12 @@ app.get('/api/admin/queue', requireAdmin, asyncRoute(async (req, res) => {
 }));
 
 app.post('/api/admin/curis/:id/status', requireAdmin, asyncRoute(async (req, res) => {
+    // Los ids de Curis siempre tienen esta forma (ver POST /api/curis); si no
+    // matchea, el valor no puede ser un id real y no hace falta ni consultar
+    // la base (evita además pasar cualquier string como filtro de PostgREST).
+    if (!/^c_[a-f0-9]{12}$/.test(req.params.id)) {
+        return res.status(400).json({ ok: false, error: 'Id inválido.' });
+    }
     const status = req.body.status;
     if (!['pending', 'approved', 'rejected'].includes(status)) {
         return res.status(400).json({ ok: false, error: 'Estado inválido.' });
