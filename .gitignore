@@ -15,3 +15,10 @@ handoff.md
 
 # Imágenes de referencia para el diseño (no son parte de la app).
 referencia*/
+
+# Documentos de auditoría: detallan vulnerabilidades del sitio en vivo.
+AUDITORIA_SEGURIDAD_*.md
+PLAN_REMEDIACION_*.md
+
+# Música suelta para recortar: los mp3 finales viven en Cloudflare R2.
+recortado/
