@@ -178,8 +178,47 @@
                 <li><strong>✏️ Pincel:</strong> dibuja con el color elegido.</li>
                 <li><strong>🧽 Borrador:</strong> borra dejando el fondo transparente (no
                 pinta de blanco).</li>
+                <li><strong>🪣 Balde:</strong> rellena de un clic toda el área conectada de
+                color parecido, para no tener que pintarla a mano. El deslizador
+                <strong>Tolerancia</strong> decide qué tan parecido tiene que ser el color
+                para entrar en el relleno — subilo si quedan bordes finitos sin rellenar
+                (por el antialiasing del trazo).</li>
                 <li><strong>💧 Cuentagotas:</strong> toma un color del lienzo o de la
                 referencia. Después de tomarlo vuelve solo al pincel.</li>
+            </ul>
+
+            <h2 id="formas">Formas</h2>
+            <p>Para cuadrados, rectángulos, círculos y líneas sin tener que dibujarlos a
+            pulso.</p>
+            <ul>
+                <li><strong>▭ Rectángulo</strong> y <strong>◯ Círculo:</strong> arrastrá
+                sobre el lienzo desde una esquina (o el centro visual) hasta el tamaño que
+                quieras. Mantené <kbd>Shift</kbd> mientras arrastrás para que el rectángulo
+                salga cuadrado y el círculo, perfecto (sin achatarse).</li>
+                <li><strong>📏 Línea recta:</strong> arrastrá de una punta a la otra.
+                Con <kbd>Shift</kbd> la línea se ajusta a los 45°.</li>
+                <li><strong>🪣 Relleno:</strong> si está activo, la forma se dibuja rellena
+                con el color elegido; si no, solo el contorno, con el mismo grosor del
+                pincel.</li>
+            </ul>
+
+            <h2 id="texto">Texto</h2>
+            <p>Para agregar la frase de tu Curi directo sobre el dibujo, sin salir del
+            calcador.</p>
+            <ul>
+                <li>Tocá <strong>🔤 Agregar texto</strong> y después tocá el lienzo donde
+                querés que aparezca: se abre un cuadro para escribir ahí mismo.</li>
+                <li><kbd>Enter</kbd> confirma y lo agrega al dibujo (usá
+                <kbd>Shift</kbd>+<kbd>Enter</kbd> para bajar de línea); tocar afuera del
+                cuadro también confirma. <kbd>Esc</kbd> cancela sin agregar nada.</li>
+                <li><strong>Tamaño de letra:</strong> de 12 a 220 píxeles, en la resolución
+                real del lienzo.</li>
+                <li><strong>Contorno para que resalte:</strong> agrega un borde alrededor de
+                las letras para que se lean bien sobre cualquier fondo, como en los memes
+                clásicos. <strong>Color del contorno:</strong> elegís vos de qué color sale
+                (negro por defecto) — o apagá el botón de arriba si no lo querés.</li>
+                <li>El texto usa el color elegido en <a href="#color">Color</a>; el contorno
+                usa su propio selector, no el mismo.</li>
             </ul>
 
             <h2 id="color">Color</h2>
@@ -209,10 +248,44 @@
             <p>Acerca o aleja la vista sin cambiar el dibujo (es solo una lupa).</p>
             <ul>
                 <li><strong>Zoom:</strong> deslizador del 100 % al 800 %.</li>
+                <li><strong>🖐️ Mover vista:</strong> con este botón activo, arrastrás con el
+                dedo o con el clic izquierdo del mouse para desplazarte por el lienzo
+                ampliado <em>sin dibujar</em> — es la forma más simple de moverte una vez
+                que hiciste zoom, sea cual sea tu dispositivo. Volvé a tocarlo (o
+                <kbd>H</kbd>) para seguir dibujando normal.</li>
                 <li><strong>↺ Reajustar vista:</strong> vuelve al 100 %.</li>
-                <li><strong>Atajos:</strong> <kbd>Ctrl</kbd> + rueda del mouse para acercar;
-                dos dedos para pellizcar y mover en pantallas táctiles; botón del medio del
-                mouse para desplazar; la tecla <kbd>0</kbd> reajusta.</li>
+                <li><strong>Otros atajos:</strong> <kbd>Ctrl</kbd> + rueda del mouse para
+                acercar; dos dedos para pellizcar y mover en pantallas táctiles; botón del
+                medio del mouse para desplazar sin necesidad de activar Mover vista; la
+                tecla <kbd>0</kbd> reajusta.</li>
+            </ul>
+
+            <h2 id="meme">Plantilla de meme</h2>
+            <p><strong>🗯️ Agregar recuadro de texto arriba</strong> agranda el lienzo
+            sumando una franja blanca en la parte de arriba, como en los memes clásicos de
+            texto arriba/imagen abajo. Tu dibujo baja para hacerle lugar — no se recorta
+            ni se deforma. Apenas se agrega la franja se abre automáticamente el cuadro de
+            <a href="#texto">Texto</a>, en negro y con un tamaño que entra bien en la
+            franja, listo para escribir la frase del Curi.</p>
+
+            <h2 id="combinar">Combinar dos Curis</h2>
+            <p><strong>🧩 Juntar dos imágenes en el lienzo</strong> sirve para unir dos
+            Curis que ya tengas (por ejemplo, dos PNG exportados de este mismo calcador)
+            en un solo dibujo.</p>
+            <ul>
+                <li>Elegí el <a href="#formato">formato del lienzo</a> que quieras
+                <em>antes</em> de combinar, para que las dos imágenes entren bien
+                proporcionadas.</li>
+                <li>Tocá el botón y elegí las dos imágenes juntas (en la ventana de tu
+                sistema, mantené <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> o <kbd>Shift</kbd> para
+                seleccionar ambas a la vez).</li>
+                <li><strong>↔ Lado a lado</strong> o <strong>↕ Uno arriba, otro abajo:</strong>
+                elegí cómo se acomodan. Cada imagen se achica o agranda sin deformarse
+                (nunca se recorta) para entrar completa en su mitad.</li>
+                <li>Esto <strong>reemplaza</strong> lo que hubiera en el lienzo — te avisa
+                antes si ya tenías algo dibujado. Después de combinar podés seguir
+                dibujando, borrando o agregando texto encima para terminar de unir las dos
+                partes a tu gusto.</li>
             </ul>
 
             <h2 id="acciones">Acciones</h2>
@@ -239,7 +312,11 @@
 
             <h2 id="atajos">Atajos de teclado</h2>
             <ul>
-                <li><kbd>B</kbd> pincel · <kbd>E</kbd> borrador · <kbd>I</kbd> cuentagotas</li>
+                <li><kbd>B</kbd> pincel · <kbd>E</kbd> borrador · <kbd>G</kbd> balde ·
+                <kbd>I</kbd> cuentagotas · <kbd>X</kbd> texto</li>
+                <li><kbd>R</kbd> rectángulo · <kbd>O</kbd> círculo · <kbd>L</kbd> línea
+                recta</li>
+                <li><kbd>H</kbd> activa/desactiva Mover vista</li>
                 <li><kbd>Ctrl</kbd>+<kbd>Z</kbd> deshacer ·
                 <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd> rehacer</li>
                 <li><kbd>0</kbd> reajustar la vista</li>

@@ -278,6 +278,7 @@
   }
   #frame.refedit #drawCanvas{cursor:grab}
   #frame.grabbing #drawCanvas{cursor:grabbing}
+  #frame.panmode #drawCanvas{cursor:grab}
 
   /* Botón flotante para ocultar/mostrar referencia (queda a mano en móvil) */
   #peekBtn{
@@ -334,6 +335,28 @@
     transform:translate(-50%,-50%);
   }
   #frame.show-brush #brushCursor{opacity:1}
+
+  /* Caja flotante del editor de texto (herramienta Texto y Plantilla de meme) */
+  .text-tool-box{
+    position:absolute;
+    transform:translate(-50%,-50%);
+    min-width:120px;
+    max-width:92%;
+    resize:none;
+    overflow:hidden;
+    background:rgba(20,24,34,.55);
+    border:1.5px dashed var(--accent);
+    border-radius:6px;
+    padding:4px 8px;
+    text-align:center;
+    font-weight:700;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    line-height:1.15;
+    z-index:7;
+    outline:none;
+    -webkit-user-select:text;
+    user-select:text;
+  }
 
   /* Guía que aparece la primera vez que entrás a Dibujar Curis */
   #cgOverlay{
@@ -490,7 +513,37 @@
       <button id="brushBtn" class="active">✏️ Pincel</button>
       <button id="eraserBtn">🧽 Borrador</button>
     </div>
-    <button id="eyedropperBtn">💧 Cuentagotas (tomar color)</button>
+    <div class="row">
+      <button id="bucketBtn">🪣 Balde</button>
+      <button id="eyedropperBtn">💧 Cuentagotas</button>
+    </div>
+    <div class="slider-head"><span class="label">Tolerancia del balde</span> <b id="bucketTolVal">24</b></div>
+    <input type="range" id="bucketTolInput" min="0" max="100" value="24">
+    <div class="hint">El balde rellena el área conectada de color parecido con el color elegido, para no tener que pintarla a mano. Subí la tolerancia si querés que abarque también bordes con antialiasing.</div>
+  </div>
+
+  <div class="group">
+    <div class="label">Formas</div>
+    <div class="row">
+      <button id="rectShapeBtn">▭ Rectángulo</button>
+      <button id="ellipseShapeBtn">◯ Círculo</button>
+    </div>
+    <button id="lineShapeBtn">📏 Línea recta</button>
+    <button id="shapeFillBtn">🪣 Relleno (si no, solo contorno)</button>
+    <div class="hint">Arrastrá sobre el lienzo para dibujar la forma. Mantené <kbd>Shift</kbd> para que el rectángulo salga cuadrado y el círculo, perfecto. El contorno usa el mismo <b>Grosor</b> del pincel.</div>
+  </div>
+
+  <div class="group">
+    <div class="label">Texto</div>
+    <button id="textBtn">🔤 Agregar texto</button>
+    <div class="slider-head"><span class="label">Tamaño de letra</span> <b id="fontSizeVal">48 px</b></div>
+    <input type="range" id="fontSizeInput" min="12" max="220" value="48">
+    <button id="textOutlineBtn" class="active">⬛ Contorno para que resalte</button>
+    <div class="color-wrap">
+      <input type="color" id="textOutlineColorInput" value="#000000">
+      <span class="label" style="text-transform:none;letter-spacing:0">Color del contorno</span>
+    </div>
+    <div class="hint">Tocá el lienzo donde querés el texto, escribilo y confirmá con <kbd>Enter</kbd> (o tocá afuera). <kbd>Esc</kbd> cancela. El texto usa el color de la sección <b>Color</b> de más abajo; el contorno usa el color de acá arriba — cambialo o apagá "Contorno" si no lo querés.</div>
   </div>
 
   <div class="group">
@@ -527,12 +580,34 @@
     <div class="label">Vista (zoom del lienzo)</div>
     <div class="slider-head"><span class="label">Zoom</span> <b id="zoomVal">100 %</b></div>
     <input type="range" id="zoomInput" min="100" max="800" value="100" step="5">
-    <button id="resetViewBtn" disabled>↺ Reajustar vista</button>
+    <div class="row">
+      <button id="panModeBtn">🖐️ Mover vista</button>
+      <button id="resetViewBtn" disabled>↺ Reajustar vista</button>
+    </div>
     <div class="hint">
+      Con <b>Mover vista</b> activo, arrastrá con el dedo o el clic izquierdo
+      para desplazarte por el lienzo ampliado sin dibujar. También andan:
       <kbd>Ctrl</kbd> + rueda del mouse para acercar, dos dedos para
       pellizcar/mover en pantallas táctiles, rueda del mouse del medio para
-      desplazar. <kbd>0</kbd> reajusta.
+      desplazar. <kbd>H</kbd> activa/desactiva Mover vista, <kbd>0</kbd> reajusta.
     </div>
+  </div>
+
+  <div class="group">
+    <div class="label">Plantilla de meme</div>
+    <button id="memeCaptionBtn">🗯️ Agregar recuadro de texto arriba</button>
+    <div class="hint">Agranda el lienzo con una franja blanca arriba para escribir la frase del Curi, como en los memes clásicos. Tu dibujo baja, no se recorta.</div>
+  </div>
+
+  <div class="group">
+    <div class="label">Combinar dos Curis</div>
+    <button id="mergeBtn">🧩 Juntar dos imágenes en el lienzo</button>
+    <input type="file" id="mergeFileInput" accept="image/*" multiple hidden>
+    <div class="row">
+      <button id="mergeSideBtn" class="active">↔ Lado a lado</button>
+      <button id="mergeStackBtn">↕ Uno arriba, otro abajo</button>
+    </div>
+    <div class="hint">Elegí dos imágenes de Curis que ya tengas (mantené <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> para seleccionar las dos juntas) y se acomodan sin deformarse en el lienzo actual, reemplazando lo que hubiera. Elegí el formato antes de combinar. Después podés seguir dibujando encima para unirlas mejor.</div>
   </div>
 
   <div class="group">
@@ -688,6 +763,24 @@
   const brushBtn  = document.getElementById('brushBtn');
   const eraserBtn = document.getElementById('eraserBtn');
   const eyedropperBtn = document.getElementById('eyedropperBtn');
+  const bucketBtn = document.getElementById('bucketBtn');
+  const bucketTolInput = document.getElementById('bucketTolInput');
+  const bucketTolVal   = document.getElementById('bucketTolVal');
+  const rectShapeBtn    = document.getElementById('rectShapeBtn');
+  const ellipseShapeBtn = document.getElementById('ellipseShapeBtn');
+  const lineShapeBtn    = document.getElementById('lineShapeBtn');
+  const shapeFillBtn    = document.getElementById('shapeFillBtn');
+  const textBtn         = document.getElementById('textBtn');
+  const fontSizeInput   = document.getElementById('fontSizeInput');
+  const fontSizeVal     = document.getElementById('fontSizeVal');
+  const textOutlineBtn  = document.getElementById('textOutlineBtn');
+  const textOutlineColorInput = document.getElementById('textOutlineColorInput');
+  const panModeBtn      = document.getElementById('panModeBtn');
+  const memeCaptionBtn  = document.getElementById('memeCaptionBtn');
+  const mergeBtn        = document.getElementById('mergeBtn');
+  const mergeFileInput  = document.getElementById('mergeFileInput');
+  const mergeSideBtn    = document.getElementById('mergeSideBtn');
+  const mergeStackBtn   = document.getElementById('mergeStackBtn');
   const colorInput= document.getElementById('colorInput');
   const sizeInput = document.getElementById('sizeInput');
   const sizeVal   = document.getElementById('sizeVal');
@@ -714,7 +807,14 @@
 
   // ---------- Estado ----------
   const state = {
-    tool: 'brush',        // 'brush' | 'eraser' | 'eyedropper'
+    tool: 'brush',        // 'brush' | 'eraser' | 'eyedropper' | 'bucket' | 'text' | 'shape'
+    shape: 'rect',         // 'rect' | 'ellipse' | 'line' (solo cuando tool === 'shape')
+    shapeFill: false,      // false = solo contorno, true = relleno
+    fontSize: 48,
+    textOutline: true,
+    textOutlineColor: '#000000',
+    bucketTolerance: 24,
+    viewPan: false,        // "Mover vista": el clic izquierdo/toque desplaza en vez de dibujar
     mode: 'draw',         // 'draw' | 'refedit'
     color: colorInput.value,
     size: parseInt(sizeInput.value, 10),
@@ -1239,13 +1339,19 @@
     }
     if (pointers.size >= 2){
       cancelStroke();
+      cancelShapeDraw();
       endRefPan();
       startPinch();
       return;
     }
+    if (state.viewPan && ev.button === 0){
+      startViewPan(ev);
+      return;
+    }
     if (gestureLock) return;
-    if (state.tool === 'eyedropper') return;   // se resuelve en 'click'
+    if (state.tool === 'eyedropper' || state.tool === 'bucket' || state.tool === 'text') return; // se resuelven en 'click'
     if (state.mode === 'refedit' && state.hasRef) return startRefPan(ev);
+    if (state.tool === 'shape') return startShapeDraw(ev);
     startDraw(ev);
   });
 
@@ -1254,6 +1360,7 @@
     if (viewPanning) return moveViewPan(ev);
     if (pinching) return movePinch();
     if (panning) return moveRefPan(ev);
+    if (shapeDrawing) return moveShapeDraw(ev);
     moveDraw(ev);
   });
 
@@ -1264,6 +1371,7 @@
     if (pointers.size === 0){
       gestureLock = false;
       endRefPan();
+      endShapeDraw();
       endDraw();
     }
   }
@@ -1274,12 +1382,23 @@
   // Evitar el autoscroll del botón del medio
   canvas.addEventListener('mousedown', (e) => { if (e.button === 1) e.preventDefault(); });
 
-  // Cuentagotas
+  // Herramientas que actúan con un clic simple (no arrastre): cuentagotas,
+  // balde de relleno y texto.
   canvas.addEventListener('click', (ev) => {
-    if (state.tool !== 'eyedropper') return;
-    const hex = sampleAt(ev.clientX, ev.clientY);
-    if (hex) setColor(hex);
-    setTool('brush');
+    if (state.tool === 'eyedropper'){
+      const hex = sampleAt(ev.clientX, ev.clientY);
+      if (hex) setColor(hex);
+      setTool('brush');
+      return;
+    }
+    if (state.tool === 'bucket'){
+      floodFillAt(ev.clientX, ev.clientY);
+      return;
+    }
+    if (state.tool === 'text'){
+      if (!textEditing) openTextEditor(ev.clientX, ev.clientY);
+      return;
+    }
   });
 
   // ---------- Referencia: carga y visibilidad ----------
@@ -1640,8 +1759,16 @@
     brushBtn.classList.toggle('active', tool === 'brush');
     eraserBtn.classList.toggle('active', tool === 'eraser');
     eyedropperBtn.classList.toggle('active', tool === 'eyedropper');
+    bucketBtn.classList.toggle('active', tool === 'bucket');
+    textBtn.classList.toggle('active', tool === 'text');
+    if (tool !== 'shape'){
+      rectShapeBtn.classList.remove('active');
+      ellipseShapeBtn.classList.remove('active');
+      lineShapeBtn.classList.remove('active');
+    }
     canvas.style.cursor = (tool === 'eraser') ? 'cell'
-                        : (tool === 'eyedropper') ? 'copy' : 'crosshair';
+                        : (tool === 'eyedropper' || tool === 'bucket') ? 'copy'
+                        : (tool === 'text') ? 'text' : 'crosshair';
   }
   brushBtn.addEventListener('click', () => setTool('brush'));
   eraserBtn.addEventListener('click', () => setTool('eraser'));
@@ -1655,6 +1782,348 @@
     }
     setTool('eyedropper');   // sin API nativa: el próximo clic sobre el lienzo toma el color
   });
+
+  function hexToRgb(hex){
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+
+  // ---------- Balde de relleno ----------
+  bucketBtn.addEventListener('click', () => setTool('bucket'));
+  bucketTolInput.addEventListener('input', () => {
+    state.bucketTolerance = parseInt(bucketTolInput.value, 10);
+    bucketTolVal.textContent = state.bucketTolerance;
+  });
+
+  function colorsMatch(d, i, r, g, b, a, tol){
+    const dr = d[i] - r, dg = d[i+1] - g, db = d[i+2] - b, da = d[i+3] - a;
+    const dist = Math.sqrt(dr*dr + dg*dg + db*db + da*da);
+    return dist <= (tol / 100) * 300;
+  }
+  // Relleno por difusión con extensión de tramos (span fill): mucho menos
+  // pila que un flood fill de 4 vecinos ingenuo sobre lienzos grandes.
+  function floodFill(x, y){
+    x = Math.round(x); y = Math.round(y);
+    if (x < 0 || y < 0 || x >= W || y >= H) return;
+    const imgData = ctx.getImageData(0, 0, W, H);
+    const d = imgData.data;
+    const startIdx = (y * W + x) * 4;
+    const sr = d[startIdx], sg = d[startIdx+1], sb = d[startIdx+2], sa = d[startIdx+3];
+    const [fr, fg, fb] = hexToRgb(state.color);
+    const fa = 255;
+    if (sr === fr && sg === fg && sb === fb && sa === fa) return; // ya es ese color
+
+    const tol = state.bucketTolerance;
+    const visited = new Uint8Array(W * H);
+    const stack = [[x, y]];
+    visited[y * W + x] = 1;
+
+    while (stack.length){
+      const [cx, cy0] = stack.pop();
+      let xl = cx;
+      while (xl > 0 && !visited[cy0 * W + (xl - 1)] && colorsMatch(d, (cy0 * W + (xl - 1)) * 4, sr, sg, sb, sa, tol)) xl--;
+      let xr = cx;
+      while (xr < W - 1 && !visited[cy0 * W + (xr + 1)] && colorsMatch(d, (cy0 * W + (xr + 1)) * 4, sr, sg, sb, sa, tol)) xr++;
+      for (let xx = xl; xx <= xr; xx++){
+        const idx = (cy0 * W + xx) * 4;
+        d[idx] = fr; d[idx+1] = fg; d[idx+2] = fb; d[idx+3] = fa;
+        visited[cy0 * W + xx] = 1;
+        for (const ny of [cy0 - 1, cy0 + 1]){
+          if (ny < 0 || ny >= H) continue;
+          const nIdx = ny * W + xx;
+          if (!visited[nIdx] && colorsMatch(d, nIdx * 4, sr, sg, sb, sa, tol)){
+            stack.push([xx, ny]);
+            visited[nIdx] = 1;
+          }
+        }
+      }
+    }
+    ctx.putImageData(imgData, 0, 0);
+  }
+  function floodFillAt(clientX, clientY){
+    const r = canvas.getBoundingClientRect();
+    const x = Math.round((clientX - r.left) * (W / r.width));
+    const y = Math.round((clientY - r.top) * (H / r.height));
+    if (x < 0 || y < 0 || x >= W || y >= H) return;
+    snapshot();
+    floodFill(x, y);
+    scheduleSave();
+  }
+
+  // ---------- Formas geométricas ----------
+  let shapeDrawing = false, shapeCommitted = false, shapeStart = null, shapeBaseData = null;
+
+  function setShapeType(s){
+    state.shape = s;
+    rectShapeBtn.classList.toggle('active', s === 'rect');
+    ellipseShapeBtn.classList.toggle('active', s === 'ellipse');
+    lineShapeBtn.classList.toggle('active', s === 'line');
+    setTool('shape');
+  }
+  rectShapeBtn.addEventListener('click', () => setShapeType('rect'));
+  ellipseShapeBtn.addEventListener('click', () => setShapeType('ellipse'));
+  lineShapeBtn.addEventListener('click', () => setShapeType('line'));
+  shapeFillBtn.addEventListener('click', () => {
+    state.shapeFill = !state.shapeFill;
+    shapeFillBtn.classList.toggle('active', state.shapeFill);
+  });
+
+  function drawShapePreview(p1, p2, shiftKey){
+    ctx.putImageData(shapeBaseData, 0, 0);
+    let x2 = p2.x, y2 = p2.y;
+    if (shiftKey){
+      if (state.shape === 'line'){
+        const dx = p2.x - p1.x, dy = p2.y - p1.y;
+        const ang = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
+        const len = Math.hypot(dx, dy);
+        x2 = p1.x + Math.cos(ang) * len;
+        y2 = p1.y + Math.sin(ang) * len;
+      } else {
+        const w = p2.x - p1.x, h = p2.y - p1.y;
+        const s = Math.max(Math.abs(w), Math.abs(h));
+        x2 = p1.x + (w < 0 ? -s : s);
+        y2 = p1.y + (h < 0 ? -s : s);
+      }
+    }
+    ctx.save();
+    ctx.lineWidth = state.size;
+    ctx.strokeStyle = state.color;
+    ctx.fillStyle = state.color;
+    ctx.beginPath();
+    if (state.shape === 'line'){
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+    } else if (state.shape === 'rect'){
+      const rx = Math.min(p1.x, x2), ry = Math.min(p1.y, y2);
+      const rw = Math.abs(x2 - p1.x), rh = Math.abs(y2 - p1.y);
+      ctx.rect(rx, ry, rw, rh);
+      if (state.shapeFill) ctx.fill(); else ctx.stroke();
+    } else {
+      const cx = (p1.x + x2) / 2, cy = (p1.y + y2) / 2;
+      const rx = Math.abs(x2 - p1.x) / 2, ry = Math.abs(y2 - p1.y) / 2;
+      ctx.ellipse(cx, cy, Math.max(rx, 0.01), Math.max(ry, 0.01), 0, 0, Math.PI * 2);
+      if (state.shapeFill) ctx.fill(); else ctx.stroke();
+    }
+    ctx.restore();
+  }
+  function startShapeDraw(ev){
+    if (ev.button !== undefined && ev.button !== 0) return;
+    shapeDrawing = true;
+    shapeCommitted = false;
+    shapeStart = pointerPos(ev);
+    try{ canvas.setPointerCapture(ev.pointerId); }catch(e){}
+  }
+  function moveShapeDraw(ev){
+    if (!shapeDrawing) return;
+    if (!shapeCommitted){
+      snapshot();
+      shapeBaseData = ctx.getImageData(0, 0, W, H);
+      shapeCommitted = true;
+    }
+    drawShapePreview(shapeStart, pointerPos(ev), ev.shiftKey);
+  }
+  function endShapeDraw(){
+    if (!shapeDrawing) return;
+    shapeDrawing = false;
+    shapeStart = null;
+    if (!shapeCommitted) return;   // toque simple sin arrastre: no dibujó nada
+    shapeBaseData = null;
+    scheduleSave();
+  }
+  function cancelShapeDraw(){
+    if (!shapeDrawing) return;
+    if (shapeCommitted && shapeBaseData) ctx.putImageData(shapeBaseData, 0, 0);
+    shapeDrawing = false; shapeCommitted = false; shapeBaseData = null; shapeStart = null;
+  }
+
+  // ---------- Texto ----------
+  let textEditing = false, textAnchor = null, textBox = null;
+
+  function bakeText(text, cx, cy){
+    if (!text.trim()) return;
+    snapshot();
+    const fs = state.fontSize;
+    ctx.save();
+    ctx.font = '700 ' + fs + 'px -apple-system, "Segoe UI", Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.lineJoin = 'round';
+    const lines = text.split('\n');
+    const lineHeight = fs * 1.15;
+    const totalH = lineHeight * (lines.length - 1);
+    lines.forEach((line, i) => {
+      const ly = cy - totalH / 2 + i * lineHeight;
+      if (state.textOutline){
+        ctx.lineWidth = Math.max(2, fs * 0.12);
+        ctx.strokeStyle = state.textOutlineColor;
+        ctx.strokeText(line, cx, ly);
+      }
+      ctx.fillStyle = state.color;
+      ctx.fillText(line, cx, ly);
+    });
+    ctx.restore();
+    scheduleSave();
+  }
+  function closeTextEditor(commit){
+    if (!textEditing) return;
+    // El estado se limpia ANTES de sacar el elemento del DOM: quitar un
+    // elemento enfocado dispara 'blur' sincrónicamente, y ese listener
+    // vuelve a llamar a closeTextEditor — con el guard ya en false, esa
+    // segunda llamada no hace nada (si no, intentaba un .remove() doble).
+    const box = textBox;
+    const value = box ? box.value : '';
+    const anchor = textAnchor;
+    textEditing = false;
+    textBox = null;
+    textAnchor = null;
+    if (box) box.remove();
+    if (commit && value && value.trim()) bakeText(value, anchor.x, anchor.y);
+  }
+  function openTextEditorAt(p){
+    closeTextEditor(false);
+    textAnchor = p;
+    const el = document.createElement('textarea');
+    el.className = 'text-tool-box';
+    el.rows = 1;
+    el.placeholder = 'Escribí acá…';
+    el.style.left = (p.x / W * 100) + '%';
+    el.style.top  = (p.y / H * 100) + '%';
+    el.style.fontSize = (state.fontSize * displayScale()) + 'px';
+    el.style.color = state.color;
+    frame.appendChild(el);
+    textBox = el;
+    textEditing = true;
+    el.focus();
+    el.addEventListener('input', () => { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; });
+    el.addEventListener('keydown', (e) => {
+      e.stopPropagation();
+      if (e.key === 'Escape'){ e.preventDefault(); closeTextEditor(false); }
+      if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); closeTextEditor(true); }
+    });
+    el.addEventListener('blur', () => closeTextEditor(true));
+  }
+  function openTextEditor(clientX, clientY){
+    openTextEditorAt(pointerPos({ clientX, clientY }));
+  }
+  textBtn.addEventListener('click', () => setTool('text'));
+  fontSizeInput.addEventListener('input', () => {
+    state.fontSize = parseInt(fontSizeInput.value, 10);
+    fontSizeVal.textContent = state.fontSize + ' px';
+    if (textBox) textBox.style.fontSize = (state.fontSize * displayScale()) + 'px';
+  });
+  textOutlineBtn.addEventListener('click', () => {
+    state.textOutline = !state.textOutline;
+    textOutlineBtn.classList.toggle('active', state.textOutline);
+  });
+  textOutlineColorInput.addEventListener('input', () => {
+    state.textOutlineColor = textOutlineColorInput.value;
+  });
+
+  // ---------- Mover vista (clic izquierdo / un dedo, sin dibujar) ----------
+  function setPanMode(on){
+    state.viewPan = on;
+    panModeBtn.classList.toggle('active', on);
+    frame.classList.toggle('panmode', on);
+  }
+  panModeBtn.addEventListener('click', () => setPanMode(!state.viewPan));
+
+  // ---------- Plantilla de meme: franja blanca arriba para el texto ----------
+  function addMemeCaptionBand(){
+    const bandH = Math.max(120, Math.round(H * 0.16));
+    const hadContent = !isCanvasEmpty();
+    if (hadContent && !confirm('Esto agranda el lienzo agregando una franja blanca arriba (tu dibujo baja, no se recorta). ¿Continuar?')) return;
+
+    const tmp = document.createElement('canvas');
+    tmp.width = W; tmp.height = H;
+    tmp.getContext('2d').drawImage(canvas, 0, 0);
+
+    H = H + bandH;
+    canvas.width = W; canvas.height = H;
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, bandH);
+    ctx.drawImage(tmp, 0, bandH);
+
+    undoStack = []; redoStack = [];
+    recomputeHistoryLimit();
+    refreshHistoryButtons();
+    sizeSub.textContent = 'Lienzo ' + W + ' × ' + H + ' · exporta en resolución real';
+    syncFormatSelect();
+    resetView();
+    fitFrame();
+    scheduleSave();
+
+    const fitSize = clamp(Math.round(bandH * 0.5), 24, 160);
+    state.fontSize = fitSize;
+    fontSizeInput.value = fitSize;
+    fontSizeVal.textContent = fitSize + ' px';
+    setColor('#000000');
+    setTool('text');
+    requestAnimationFrame(() => openTextEditorAt({ x: W / 2, y: bandH / 2 }));
+  }
+  memeCaptionBtn.addEventListener('click', addMemeCaptionBand);
+
+  // ---------- Combinar dos Curis en el lienzo actual ----------
+  let mergeLayout = 'side'; // 'side' | 'stack'
+  mergeSideBtn.addEventListener('click', () => {
+    mergeLayout = 'side';
+    mergeSideBtn.classList.add('active');
+    mergeStackBtn.classList.remove('active');
+  });
+  mergeStackBtn.addEventListener('click', () => {
+    mergeLayout = 'stack';
+    mergeStackBtn.classList.add('active');
+    mergeSideBtn.classList.remove('active');
+  });
+  mergeBtn.addEventListener('click', () => mergeFileInput.click());
+  mergeFileInput.addEventListener('change', () => {
+    const files = [...(mergeFileInput.files || [])].slice(0, 2);
+    mergeFileInput.value = '';
+    if (files.length < 2){
+      alert('Elegí dos imágenes (mantené Ctrl/Cmd o Shift para seleccionar las dos juntas en el mismo cuadro).');
+      return;
+    }
+    Promise.all(files.map(loadImageFile))
+      .then(([img1, img2]) => combineImages(img1, img2, mergeLayout))
+      .catch(() => alert('No se pudieron cargar las imágenes.'));
+  });
+  function loadImageFile(file){
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('no se pudo cargar')); };
+      img.src = url;
+    });
+  }
+  // Encaja "img" centrado dentro del rectángulo (x,y,w,h) sin deformarlo (contain)
+  function drawContain(target, img, x, y, w, h){
+    const s = Math.min(w / img.naturalWidth, h / img.naturalHeight);
+    const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+    target.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+  }
+  function combineImages(img1, img2, layout){
+    const hadContent = !isCanvasEmpty();
+    if (hadContent && !confirm('Combinar dos imágenes reemplaza el dibujo actual del lienzo por un lienzo nuevo con las dos imágenes. ¿Continuar?')) return;
+
+    ctx.clearRect(0, 0, W, H);
+    const gap = Math.round(Math.min(W, H) * 0.015);
+    if (layout === 'side'){
+      const halfW = (W - gap) / 2;
+      drawContain(ctx, img1, 0, 0, halfW, H);
+      drawContain(ctx, img2, halfW + gap, 0, halfW, H);
+    } else {
+      const halfH = (H - gap) / 2;
+      drawContain(ctx, img1, 0, 0, W, halfH);
+      drawContain(ctx, img2, 0, halfH + gap, W, halfH);
+    }
+
+    undoStack = []; redoStack = [];
+    recomputeHistoryLimit();
+    refreshHistoryButtons();
+    scheduleSave();
+  }
 
   const SWATCHES = ['#000000','#ffffff','#ff3b3b','#ff9f0a','#ffd60a','#34c759',
                     '#0a84ff','#5e5ce6','#bf5af2','#ff375f','#8e8e93','#00c7be'];
@@ -1676,8 +2145,9 @@
   function setColor(c){
     state.color = c;
     colorInput.value = c;
-    if (state.tool !== 'brush') setTool('brush');
+    if (state.tool === 'eyedropper') setTool('brush');
     syncSwatches();
+    if (textBox) textBox.style.color = c;
   }
   colorInput.addEventListener('input', () => {
     setColor(colorInput.value);
@@ -1706,7 +2176,8 @@
     sizePreviewTimer = setTimeout(() => sizePreview.classList.remove('show'), 1100);
   }
   function moveBrushCursor(ev){
-    if (state.mode === 'refedit' || state.tool === 'eyedropper' || pinching || viewPanning){
+    if (state.mode === 'refedit' || state.tool === 'eyedropper' || state.tool === 'bucket'
+        || state.tool === 'text' || state.viewPan || pinching || viewPanning){
       frame.classList.remove('show-brush');
       return;
     }
@@ -1795,6 +2266,12 @@
       if (k === 'b') setTool('brush');
       if (k === 'e') setTool('eraser');
       if (k === 'i') eyedropperBtn.click();
+      if (k === 'g') setTool('bucket');
+      if (k === 'x') textBtn.click();
+      if (k === 'r') setShapeType('rect');
+      if (k === 'o') setShapeType('ellipse');
+      if (k === 'l') setShapeType('line');
+      if (k === 'h') setPanMode(!state.viewPan);
       if (k === '0') resetView();
     }
   });
