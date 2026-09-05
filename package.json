@@ -5,7 +5,7 @@
   "description": "Backend de CurisFandom (servidor Express, base de datos en Supabase, imágenes y música en Cloudflare R2).",
   "main": "server.js",
   "engines": {
-    "node": ">=18"
+    "node": ">=20.9"
   },
   "scripts": {
     "start": "node server.js",
@@ -14,8 +14,8 @@
   "dependencies": {
     "aws4fetch": "^1.0.20",
     "express": "^4.19.2",
-    "express-rate-limit": "^7.5.1",
+    "express-rate-limit": "^8.7.0",
     "google-auth-library": "^11.0.2",
-    "sharp": "^0.33.5"
+    "sharp": "^0.35.4"
   }
 }

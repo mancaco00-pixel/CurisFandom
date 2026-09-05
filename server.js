@@ -26,7 +26,7 @@ const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
-const rateLimit = require('express-rate-limit');
+const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 const db = require('./db');
 const storage = require('./storage');
 
@@ -154,8 +154,10 @@ const mkLimiter = (windowMin, max) => rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     // Cloudflare pone la IP real del visitante en CF-Connecting-IP; sin ese
-    // header (local) se cae a req.ip.
-    keyGenerator: (req) => req.headers['cf-connecting-ip'] || req.ip || 'unknown',
+    // header (local) se cae a req.ip. ipKeyGenerator normaliza IPv6 (agrupa
+    // por subred /56) para que no se pueda esquivar el límite pidiendo una
+    // dirección IPv6 distinta en cada request.
+    keyGenerator: (req) => ipKeyGenerator(req.headers['cf-connecting-ip'] || req.ip || 'unknown'),
     // Se usa CF-Connecting-IP a propósito -> se silencia la validación de
     // "trust proxy permisivo" de express-rate-limit.
     validate: { trustProxy: false, xForwardedForHeader: false },
